@@ -5,9 +5,9 @@
         <Icon icon="ph:github-logo-duotone" class="h-5 w-5" />
       </NuxtLink>
     </span>
-    <span>|</span>
+    <Separator orientation="vertical" />
     <span>A linolabs project.</span>
-    <span>|</span>
+    <Separator orientation="vertical" />
     <Button variant="link" class="p-0 text-base" @click="toggleUserManualOpen">
       用户手册
     </Button>
@@ -17,6 +17,7 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
+import { Separator } from '@/components/ui/separator';
 
 const [isUserManualOpen, toggleUserManualOpen] = useToggle(false);
 </script>

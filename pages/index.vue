@@ -1,8 +1,7 @@
 <template>
-  <div>
-    <button @click="toggleLoginOpen()">
-      Open Login
-    </button>
+  <div class="flex flex-col justify-center items-center gap-y-20">
+    <Hero />
+    <BookVenue />
     <Login :open="isLoginOpen" :toggle-open="toggleLoginOpen" @login-success="store.fetchVenueList" />
     <Footer />
   </div>
@@ -21,7 +20,7 @@ useHead({
     },
   ],
   bodyAttrs: {
-    class: 'min-h-screen',
+    class: 'min-h-screen w-full grid grid-cols-1 content-center',
   },
 });
 
