@@ -12,16 +12,6 @@ export interface TVenueResponseItem {
 
 export type TVenueResponse = TVenueResponseItem[];
 
-export interface TVenue {
-  id: number;
-  name: string;
-  building: string;
-  floor: string;
-  events: TCalenderEventItem[];
-}
-
-export type TVenueList = TVenue[];
-
 export interface TCalenderEvents {
   venue_id: number;
   events: TCalenderEventItem[];
@@ -33,3 +23,26 @@ export interface TCalenderEventItem {
 }
 
 export type TCalenderEventResponse = TCalenderEvents[];
+
+export interface TOrderTimeItem {
+  start_at: string;
+  end_at: string;
+  venue_id: number;
+}
+
+export type TOrderTimesResponse = TOrderTimeItem[];
+
+export interface TOcupiedTime {
+  start_at: string;
+  end_at: string;
+}
+
+export interface TVenue {
+  id: number;
+  name: string;
+  building: string;
+  floor: string;
+  occupiedTimes: TOcupiedTime[];
+}
+
+export type TVenueList = TVenue[];

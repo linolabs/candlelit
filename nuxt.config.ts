@@ -6,8 +6,8 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     '@nuxtjs/tailwindcss',
     'shadcn-nuxt',
-    "@pinia-plugin-persistedstate/nuxt",
-    "@nuxt/image"
+    '@pinia-plugin-persistedstate/nuxt',
+    '@nuxt/image',
   ],
   shadcn: {
     /**
@@ -19,12 +19,5 @@ export default defineNuxtConfig({
      * @default "./components/ui"
      */
     componentDir: './components/ui',
-  },
-  runtimeConfig: {
-    public: {
-      SEIUE_PASSPORT_URL: 'https://passport.seiue.com',
-      SEIUE_API_URL: 'https://api.seiue.com',
-      SEIUE_CHALK_URL: 'https://chalk-c3.seiue.com',
-    },
   },
 });
