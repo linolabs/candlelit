@@ -3,7 +3,7 @@
  *
  * @credits https://github.com/lorossi/zero-width-steganography
  */
-class ZeroWidth {
+export class ZeroWidth {
   private characterMap: Record<string, string>;
   private spaceMap: Record<string, string>;
   private ciphertextCharacters: Set<string>;
@@ -21,11 +21,11 @@ class ZeroWidth {
     this.ciphertextCharacters = new Set(Object.keys(this.spaceMap));
   }
 
-  private _spaceEncode(clear: string): string {
-    if (clear.length === 0)
+  private _spaceEncode(secret: string): string {
+    if (secret.length === 0)
       return '';
 
-    const binary = clear.split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join('');
+    const binary = secret.split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join('');
     return [...binary].map(b => this.characterMap[b]).join('');
   }
 
@@ -42,8 +42,21 @@ class ZeroWidth {
     return decoded;
   }
 
-  zeroEncode(source: string, clear: string): string {
-    const encoded = this._spaceEncode(clear);
+  /**
+   * Encodes secret string into the source string.
+   *
+   * @param source - The safe and visible string.
+   * @param secret - The secret string.
+   * @returns The encoded string.
+   *
+   * @example
+   * ```ts
+   * const zeroWidth = new ZeroWidth();
+   * const encoded = zeroWidth.zeroEncode('Hello, world', 'supersecret');
+   * ```
+   */
+  zeroEncode(source: string, secret: string): string {
+    const encoded = this._spaceEncode(secret);
     return source + encoded;
   }
 
@@ -59,11 +72,3 @@ class ZeroWidth {
     return [...source].filter(s => !this.ciphertextCharacters.has(s)).join('');
   }
 }
-
-// test code
-
-const zeroWidth = new ZeroWidth();
-const clear = '@candlelit';
-const encoded = zeroWidth.zeroEncode('用作学长团会议', clear);
-console.log(encoded);
-console.log(zeroWidth.zeroDecode(encoded));

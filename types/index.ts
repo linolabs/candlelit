@@ -46,3 +46,16 @@ export interface TVenue {
 }
 
 export type TVenueList = TVenue[];
+
+export interface TNewOrder {
+  capacity: number;
+  description: string;
+  dateRanges: {
+    startAt: string;
+    endAt: string;
+  };
+  timeRanges: {
+    startAt: string;
+    endAt: string;
+  }[];
+}

@@ -1,5 +1,6 @@
-import { ofetch } from 'ofetch';
-import type { TCalenderEventResponse, TOcupiedTime, TOrderTimesResponse, TSeiueAuthResposnse, TVenueList, TVenueResponse } from '~/types';
+import { FetchError, ofetch } from 'ofetch';
+import { ZeroWidth } from '~/utils/zerowidth';
+import type { TCalenderEventResponse, TNewOrder, TOcupiedTime, TOrderTimesResponse, TSeiueAuthResposnse, TVenueList, TVenueResponse } from '~/types';
 import { getMondayOfWeek, getSundayTwoWeeksLater } from '~/utils/shared';
 import { SEIUE_API_URL, SEIUE_CHALK_URL, SEIUE_PASSPORT_URL } from '~/constants';
 
@@ -19,10 +20,22 @@ export interface TDirectCredentials { accessToken: string; activeReflectionId: n
 export class Seiue {
   private accessToken: string;
   private activeReflectionId: number;
+  private fetcher: typeof ofetch;
 
   constructor(accessToken: string, activeReflectionId: number) {
     this.accessToken = accessToken;
     this.activeReflectionId = activeReflectionId;
+    this.fetcher = ofetch.create({
+      headers: {
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0',
+        'authorization': `Bearer ${this.accessToken}`,
+        'accept': 'application/json, text/plain, */*',
+        'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
+        'x-reflection-id': this.activeReflectionId.toString(),
+        'x-role': 'student',
+        'x-school-id': '282',
+      },
+    });
   }
 
   static async init(credentials: TCredentials): Promise<Seiue | null>;
@@ -72,15 +85,9 @@ export class Seiue {
   }
 
   async getCalendarEvents(venueIds: string): Promise<TCalenderEventResponse> {
-    return await ofetch<TCalenderEventResponse>(`${SEIUE_API_URL}/scms/venue/venues/calendar-events`, {
+    return await this.fetcher<TCalenderEventResponse>(`${SEIUE_API_URL}/scms/venue/venues/calendar-events`, {
       headers: {
-        'accept': 'application/json, text/plain, */*',
-        'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
-        'authorization': `Bearer ${this.accessToken}`,
-        'x-reflection-id': this.activeReflectionId.toString(),
-        'x-role': 'student',
-        'x-school-id': '282',
-        'Referer': SEIUE_CHALK_URL,
+        Referer: SEIUE_CHALK_URL,
       },
       params: {
         end_time: getSundayTwoWeeksLater(),
@@ -92,15 +99,9 @@ export class Seiue {
   }
 
   async getOrderTimes(venueIds: string): Promise<TOrderTimesResponse> {
-    return await ofetch(`${SEIUE_API_URL}/scms/venue/order-times`, {
+    return await this.fetcher(`${SEIUE_API_URL}/scms/venue/order-times`, {
       headers: {
-        'accept': 'application/json, text/plain, */*',
-        'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
-        'authorization': `Bearer ${this.accessToken}`,
-        'x-reflection-id': this.activeReflectionId.toString(),
-        'x-role': 'student',
-        'x-school-id': '282',
-        'Referer': SEIUE_CHALK_URL,
+        Referer: SEIUE_CHALK_URL,
       },
       params: {
         end_at_elt: getSundayTwoWeeksLater(),
@@ -113,16 +114,9 @@ export class Seiue {
   }
 
   async getVenueList(): Promise<TVenueList> {
-    const venueRes = await ofetch<TVenueResponse>(`${SEIUE_API_URL}/scms/venue/order-venues`, {
+    const venueRes = await this.fetcher<TVenueResponse>(`${SEIUE_API_URL}/scms/venue/order-venues`, {
       headers: {
-        'accept': 'application/json, text/plain, */*',
-        'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
-        'x-reflection-id': this.activeReflectionId.toString(),
-        'x-role': 'student',
-        'authorization': `Bearer ${this.accessToken}`,
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0',
-        'x-school-id': '282',
-        'Referer': SEIUE_CHALK_URL,
+        Referer: SEIUE_CHALK_URL,
       },
       method: 'GET',
       params: {
@@ -151,5 +145,71 @@ export class Seiue {
       venue.occupiedTimes.push({ start_at, end_at });
     }
     return venues;
+  }
+
+  async createOrder(venueId: number, order: TNewOrder) {
+    const zeroWidth = new ZeroWidth();
+    try {
+      const res = await this.fetcher(`${SEIUE_API_URL}/scms/venue/order-venues/${venueId}/orders`, {
+        headers: {
+          Referer: SEIUE_CHALK_URL,
+        },
+        method: 'POST',
+        body: {
+          type: 'single_day',
+          time_ranges: order.timeRanges.map(({ startAt, endAt }) => ({ start_at: startAt, end_at: endAt })),
+          capacity: order.capacity,
+          // hide @candlelit in order description which serves as a marker
+          description: zeroWidth.zeroEncode(order.description, '@candlelit'),
+          date_ranges: {
+            start_at: order.dateRanges.startAt,
+            end_at: order.dateRanges.endAt,
+          },
+        },
+      });
+      return { success: true as const, message: '预约成功', orderId: res.id as number };
+    } catch (e: unknown) {
+      if (e instanceof FetchError && e.status === 422)
+        return { success: false as const, message: '时间冲突' };
+      return { success: false as const, message: '未知错误' };
+    }
+  }
+
+  async getOrderDetail(orderId: number) {
+    return await this.fetcher(`${SEIUE_API_URL}/scms/venue/orders/${orderId}`, {
+      headers: {
+        expand: 'order_times,venue',
+        Referer: SEIUE_CHALK_URL,
+      },
+      method: 'GET',
+    });
+  }
+
+  async getMyOrders() {
+    return await this.fetcher(`${SEIUE_API_URL}/scms/venue/my-orders`, {
+      headers: {
+        Referer: SEIUE_CHALK_URL,
+      },
+      params: {
+        expand: 'order_times,venue',
+        page: 1,
+        per_page: 100,
+      },
+      method: 'GET',
+    });
+  }
+
+  async cancelOrder(orderId: number) {
+    try {
+      await this.fetcher(`${SEIUE_API_URL}/scms/venue/candel-orders/${orderId}`, {
+        headers: {
+          Referer: SEIUE_CHALK_URL,
+        },
+        method: 'PUT',
+      });
+      return { success: true as const, message: '取消成功' };
+    } catch {
+      return { success: false as const, message: '取消失败' };
+    }
   }
 }
