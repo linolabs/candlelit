@@ -1,8 +1,19 @@
 import { FetchError, ofetch } from 'ofetch';
 import { ZeroWidth } from '~/utils/zerowidth';
-import type { TCalenderEventResponse, TNewOrder, TOcupiedTime, TOrderTimesResponse, TSeiueAuthResposnse, TVenueList, TVenueResponse } from '~/types';
+import type {
+  TCalenderEventResponse,
+  TMyOrdersResponse,
+  TNewOrder,
+  TOcupiedTime,
+  TOrder,
+  TOrderDetailResponse,
+  TOrderTimesResponse,
+  TSeiueAuthResposnse,
+  TVenueList,
+  TVenueResponse,
+} from '~/types';
 import { getMondayOfWeek, getSundayTwoWeeksLater } from '~/utils/shared';
-import { SEIUE_API_URL, SEIUE_CHALK_URL, SEIUE_PASSPORT_URL } from '~/constants';
+import { SEIUE_API_URL, SEIUE_CHALK_URL, SEIUE_PASSPORT_URL, candlelitMark } from '~/constants';
 
 export function cookiesParser(cookies: string[]) {
   const parsedCookies: Record<string, string> = {};
@@ -21,6 +32,7 @@ export class Seiue {
   private accessToken: string;
   private activeReflectionId: number;
   private fetcher: typeof ofetch;
+  private zeroWidth = new ZeroWidth();
 
   constructor(accessToken: string, activeReflectionId: number) {
     this.accessToken = accessToken;
@@ -34,6 +46,7 @@ export class Seiue {
         'x-reflection-id': this.activeReflectionId.toString(),
         'x-role': 'student',
         'x-school-id': '282',
+        'referer': SEIUE_CHALK_URL,
       },
     });
   }
@@ -86,9 +99,6 @@ export class Seiue {
 
   async getCalendarEvents(venueIds: string): Promise<TCalenderEventResponse> {
     return await this.fetcher<TCalenderEventResponse>(`${SEIUE_API_URL}/scms/venue/venues/calendar-events`, {
-      headers: {
-        Referer: SEIUE_CHALK_URL,
-      },
       params: {
         end_time: getSundayTwoWeeksLater(),
         start_time: getMondayOfWeek(),
@@ -100,9 +110,6 @@ export class Seiue {
 
   async getOrderTimes(venueIds: string): Promise<TOrderTimesResponse> {
     return await this.fetcher(`${SEIUE_API_URL}/scms/venue/order-times`, {
-      headers: {
-        Referer: SEIUE_CHALK_URL,
-      },
       params: {
         end_at_elt: getSundayTwoWeeksLater(),
         start_at_egt: getMondayOfWeek(),
@@ -115,9 +122,6 @@ export class Seiue {
 
   async getVenueList(): Promise<TVenueList> {
     const venueRes = await this.fetcher<TVenueResponse>(`${SEIUE_API_URL}/scms/venue/order-venues`, {
-      headers: {
-        Referer: SEIUE_CHALK_URL,
-      },
       method: 'GET',
       params: {
         expand: 'places,place_ids',
@@ -138,29 +142,25 @@ export class Seiue {
     const orderTimes = await this.getOrderTimes(venueIds);
     for (const { venue_id, events } of calendarEvents) {
       const venue = venues.find(({ id }) => id === venue_id)!;
-      venue.occupiedTimes.push(...events.map(({ start_time, end_time }) => ({ start_at: start_time, end_at: end_time })));
+      venue.occupiedTimes.push(...events.map(({ start_time, end_time }) => ({ startAt: start_time, endAt: end_time })));
     }
     for (const { venue_id, start_at, end_at } of orderTimes) {
       const venue = venues.find(({ id }) => id === venue_id)!;
-      venue.occupiedTimes.push({ start_at, end_at });
+      venue.occupiedTimes.push({ startAt: start_at, endAt: end_at });
     }
     return venues;
   }
 
   async createOrder(venueId: number, order: TNewOrder) {
-    const zeroWidth = new ZeroWidth();
     try {
       const res = await this.fetcher(`${SEIUE_API_URL}/scms/venue/order-venues/${venueId}/orders`, {
-        headers: {
-          Referer: SEIUE_CHALK_URL,
-        },
         method: 'POST',
         body: {
           type: 'single_day',
           time_ranges: order.timeRanges.map(({ startAt, endAt }) => ({ start_at: startAt, end_at: endAt })),
           capacity: order.capacity,
-          // hide @candlelit in order description which serves as a marker
-          description: zeroWidth.zeroEncode(order.description, '@candlelit'),
+          // hide candlelitMark in order description
+          description: this.zeroWidth.zeroEncode(order.description, candlelitMark),
           date_ranges: {
             start_at: order.dateRanges.startAt,
             end_at: order.dateRanges.endAt,
@@ -175,21 +175,20 @@ export class Seiue {
     }
   }
 
-  async getOrderDetail(orderId: number) {
-    return await this.fetcher(`${SEIUE_API_URL}/scms/venue/orders/${orderId}`, {
-      headers: {
-        expand: 'order_times,venue',
-        Referer: SEIUE_CHALK_URL,
-      },
-      method: 'GET',
-    });
+  async getOrderDetail(orderId: number): Promise<TOrder> {
+    const res = await this.fetcher<TOrderDetailResponse>(`${SEIUE_API_URL}/scms/venue/orders/${orderId}`);
+
+    return {
+      capacity: res.capacity,
+      description: res.description,
+      timeRanges: res.time_ranges.map(({ start_at, end_at }) => ({ startAt: start_at, endAt: end_at })),
+      venueId: res.venue_id,
+      isCandlelit: this.zeroWidth.zeroDecode(res.description) === candlelitMark,
+    };
   }
 
-  async getMyOrders() {
-    return await this.fetcher(`${SEIUE_API_URL}/scms/venue/my-orders`, {
-      headers: {
-        Referer: SEIUE_CHALK_URL,
-      },
+  async getMyOrders(): Promise<TOrder[]> {
+    const res = await this.fetcher<TMyOrdersResponse>(`${SEIUE_API_URL}/scms/venue/my-orders`, {
       params: {
         expand: 'order_times,venue',
         page: 1,
@@ -197,14 +196,18 @@ export class Seiue {
       },
       method: 'GET',
     });
+    return res.map(({ capacity, description, time_ranges, venue_id }) => ({
+      capacity,
+      description,
+      timeRanges: time_ranges.map(({ start_at, end_at }) => ({ startAt: start_at, endAt: end_at })),
+      venueId: venue_id,
+      isCandlelit: this.zeroWidth.zeroDecode(description) === candlelitMark,
+    }));
   }
 
   async cancelOrder(orderId: number) {
     try {
       await this.fetcher(`${SEIUE_API_URL}/scms/venue/candel-orders/${orderId}`, {
-        headers: {
-          Referer: SEIUE_CHALK_URL,
-        },
         method: 'PUT',
       });
       return { success: true as const, message: '取消成功' };

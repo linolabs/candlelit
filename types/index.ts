@@ -24,15 +24,20 @@ export interface TCalenderEventItem {
 
 export type TCalenderEventResponse = TCalenderEvents[];
 
-export interface TOrderTimeItem {
+export interface TOrderTimesResponseItem {
   start_at: string;
   end_at: string;
   venue_id: number;
 }
 
-export type TOrderTimesResponse = TOrderTimeItem[];
+export type TOrderTimesResponse = TOrderTimesResponseItem[];
 
 export interface TOcupiedTime {
+  startAt: string;
+  endAt: string;
+}
+
+export interface TTimeRangeItem {
   start_at: string;
   end_at: string;
 }
@@ -59,3 +64,20 @@ export interface TNewOrder {
     endAt: string;
   }[];
 }
+
+export interface TOrderDetailResponse {
+  capacity: number;
+  description: string;
+  time_ranges: TTimeRangeItem[];
+  venue_id: number;
+}
+
+export interface TOrder {
+  capacity: number;
+  description: string;
+  timeRanges: TOcupiedTime[];
+  venueId: number;
+  isCandlelit: boolean; // is created using this tool
+}
+
+export type TMyOrdersResponse = TOrderDetailResponse[];
