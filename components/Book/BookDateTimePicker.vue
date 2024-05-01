@@ -107,5 +107,5 @@ const dateTimeLabel = computed(() => {
   return dateTime.value.toISOString().replace('T', ' ').replace(/\.\d{3}Z/, '');
 });
 
-watch(dateTimeLabel, (newVal) => model.value = { label: newVal, time: dateTime.value });
+watch(dateTimeLabel, newVal => model.value = { label: newVal, time: dateTime.value });
 </script>

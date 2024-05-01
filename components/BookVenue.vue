@@ -11,7 +11,6 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
-import { cn } from '@/lib/ui-utils';
 
 const startTime = ref<{ label: string; time: Date | null }>({ label: '', time: null });
 const endTime = ref<{ label: string; time: Date | null }>({ label: '', time: null });
