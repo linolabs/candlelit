@@ -8,6 +8,10 @@ export interface TSeiueAuthResposnse {
 export interface TVenueResponseItem {
   id: number;
   name: string;
+  open_time_ranges: {
+    ranges: TSeiueTimeRangeItem[];
+    week_days: number[];
+  }[];
 }
 
 export type TVenueResponse = TVenueResponseItem[];
@@ -32,22 +36,27 @@ export interface TOrderTimesResponseItem {
 
 export type TOrderTimesResponse = TOrderTimesResponseItem[];
 
-export interface TOcupiedTime {
-  startAt: string;
-  endAt: string;
+export interface TSeiueTimeRangeItem {
+  start_at: string;
+  end_at: string;
 }
 
 export interface TTimeRangeItem {
-  start_at: string;
-  end_at: string;
+  startAt: string;
+  endAt: string;
+
 }
 
 export interface TVenue {
   id: number;
   name: string;
-  building: string;
+  building: 'A' | 'B' | 'C' | 'D';
   floor: string;
-  occupiedTimes: TOcupiedTime[];
+  openTimeRanges: {
+    ranges: TTimeRangeItem[];
+    weekDays: number[];
+  }[];
+  occupiedTimes: TTimeRangeItem[];
 }
 
 export type TVenueList = TVenue[];
@@ -68,14 +77,14 @@ export interface TNewOrder {
 export interface TOrderDetailResponse {
   capacity: number;
   description: string;
-  time_ranges: TTimeRangeItem[];
+  time_ranges: TSeiueTimeRangeItem[];
   venue_id: number;
 }
 
 export interface TOrder {
   capacity: number;
   description: string;
-  timeRanges: TOcupiedTime[];
+  timeRanges: TTimeRangeItem[];
   venueId: number;
   isCandlelit: boolean; // is created using this tool
 }

@@ -4,11 +4,11 @@ import type {
   TCalenderEventResponse,
   TMyOrdersResponse,
   TNewOrder,
-  TOcupiedTime,
   TOrder,
   TOrderDetailResponse,
   TOrderTimesResponse,
   TSeiueAuthResposnse,
+  TTimeRangeItem,
   TVenueList,
   TVenueResponse,
 } from '~/types';
@@ -108,16 +108,40 @@ export class Seiue {
     });
   }
 
-  async getOrderTimes(venueIds: string): Promise<TOrderTimesResponse> {
-    return await this.fetcher(`${SEIUE_API_URL}/scms/venue/order-times`, {
-      params: {
-        end_at_elt: getSundayTwoWeeksLater(),
-        start_at_egt: getMondayOfWeek(),
-        status: 'initiated',
-        venue_id_in: venueIds,
-      },
-      method: 'GET',
-    });
+  async getOrderTimes(venueIds: string, splitSize: number = 3): Promise<TOrderTimesResponse> {
+    // split venueIds then group by split size to avoid too large response and loss of data
+    const venueIdsArray = venueIds.split(',');
+    const venueIdGroups = [];
+    for (let i = 0; i < venueIdsArray.length; i += splitSize)
+      venueIdGroups.push(venueIdsArray.slice(i, i + splitSize).join(','));
+
+    // make requests concurrently then concat the results
+    const orderTimes = await Promise.all(
+      venueIdGroups.map(
+        venueIds =>
+          this.fetcher<TOrderTimesResponse>(`${SEIUE_API_URL}/scms/venue/order-times`, {
+            params: {
+              end_at_elt: getSundayTwoWeeksLater(),
+              start_at_egt: getMondayOfWeek(),
+              status: 'initiated',
+              venue_id_in: venueIds,
+            },
+            method: 'GET',
+          }),
+      ),
+    );
+    return orderTimes.flat();
+
+    // old code
+    // return await this.fetcher(`${SEIUE_API_URL}/scms/venue/order-times`, {
+    //   params: {
+    //     end_at_elt: getSundayTwoWeeksLater(),
+    //     start_at_egt: getMondayOfWeek(),
+    //     status: 'initiated',
+    //     venue_id_in: venueIds,
+    //   },
+    //   method: 'GET',
+    // });
   }
 
   async getVenueList(): Promise<TVenueList> {
@@ -133,9 +157,19 @@ export class Seiue {
         type_id_in: 32008,
       },
     });
-    const venues = venueRes.map(({ id, name }) => {
+    const venues = venueRes.map(({ id, name, open_time_ranges }) => {
       const [building, floor] = name.match(/([A-Z])(\d)/)?.slice(1) ?? [];
-      return { id, name, building: building as string, floor: floor as string, occupiedTimes: [] as TOcupiedTime[] };
+      return {
+        id,
+        name,
+        building: building as 'A' | 'B' | 'C' | 'D',
+        floor: floor as string,
+        openTimeRanges: open_time_ranges.map(({ ranges, week_days }) => ({
+          ranges: ranges.map(({ start_at, end_at }) => ({ startAt: start_at, endAt: end_at })),
+          weekDays: week_days,
+        })),
+        occupiedTimes: [] as TTimeRangeItem[],
+      };
     });
     const venueIds = venues.map(({ id }) => id).join(',');
     const calendarEvents = await this.getCalendarEvents(venueIds);
