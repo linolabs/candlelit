@@ -1,5 +1,5 @@
 import type { Seiue } from './seiue';
-import type { TVenue, TVenueList } from '~/types';
+import type { TNewOrder, TNewOrderInput, TSendOrderResult, TSendOrderResultItem, TVenue, TVenueList } from '~/types';
 
 export interface TSortOptions {
   firstSortBy: 'floor' | 'building';
@@ -12,7 +12,7 @@ export class Booker {
 
   constructor(seiue: Seiue, venues: TVenueList) {
     this.seiue = seiue;
-    this.venues = venues;
+    this.venues = this.sortVenues(venues);
   }
 
   static async init(seiue: Seiue): Promise<Booker> {
@@ -40,8 +40,8 @@ export class Booker {
     return false;
   }
 
-  async isVenueAvailable(venueId: number, startTime: string, endTime: string): Promise<boolean> {
-    const venue = this.venues.find(({ id }) => id === venueId);
+  async _isVenueAvailable(venueId: number, startTime: string, endTime: string, venueSource: TVenueList = this.venues): Promise<boolean> {
+    const venue = venueSource.find(({ id }) => id === venueId);
     if (!venue)
       return false;
 
@@ -51,26 +51,38 @@ export class Booker {
     if (!this.isTimeRangeValid(start, end, venue))
       return false;
 
-    if (venue.occupiedTimes.some((occupied) => {
-      const occupiedStart = new Date(occupied.startAt);
-      const occupiedEnd = new Date(occupied.endAt);
+    const unavailableTimes = venue.occupiedTimes.concat(venue.preallocatedTimes ?? []);
+
+    if (unavailableTimes.some((time) => {
+      const unavailableStart = new Date(time.startAt);
+      const unavailableEnd = new Date(time.endAt);
 
       // Check if timeRange does not overlap with occupied time range
-      return (start >= occupiedStart && start < occupiedEnd)
-        || (end > occupiedStart && end <= occupiedEnd);
+      return (start >= unavailableStart && start < unavailableEnd)
+        || (end > unavailableStart && end <= unavailableEnd);
     }))
       return false;
 
     return true;
   }
 
-  async findAvailableVenues(startTime: string, endTime: string): Promise<TVenueList> {
+  async findAvailableVenue(startTime: string, endTime: string, venueSource: TVenueList = this.venues): Promise<TVenue> {
+    // Find the first available venue
+    for (const venue of venueSource) {
+      if (await this._isVenueAvailable(venue.id, startTime, endTime, venueSource))
+        return venue;
+    }
+    // If for loop ends without returning, no venue is available
+    throw new Error('No venue available');
+  }
+
+  async findAvailableVenuesAll(startTime: string, endTime: string, venueSource: TVenueList = this.venues): Promise<TVenueList> {
     const venues = await Promise.all(this.venues.map(async (venue) => {
-      return (await this.isVenueAvailable(venue.id, startTime, endTime)) ? venue : {} as TVenue;
+      return (await this._isVenueAvailable(venue.id, startTime, endTime, venueSource)) ? venue : {} as TVenue;
     }));
     if (venues.length === 0)
       throw new Error('No venue available');
-    return this.sortVenues(venues.filter(venue => venue.id !== undefined));
+    return venues.filter(venue => venue.id !== undefined);
   }
 
   sortVenues(
@@ -107,21 +119,108 @@ export class Booker {
     });
   }
 
-  async bookVenue(startTime: string, endTime: string, capacity: number, description: string): Promise<void> {
-    const availableVenues = await this.findAvailableVenues(startTime, endTime);
+  /**
+   * Sends an order or an array of orders asynchronously.
+   *
+   * @param orderInput - Order (or array of orders) to be sent.
+   * @param concurrency - The number of orders to be processed concurrently. Defaults to 2.
+   * @throws An error if no order input is provided.
+   */
+  async sendOrder(orderInput: TNewOrder): Promise<TSendOrderResultItem>;
+  async sendOrder(orderInput: TNewOrder[]): Promise<TSendOrderResult>;
+  async sendOrder(orderInput: TNewOrder[] | TNewOrder, concurrency: number = 2): Promise<TSendOrderResult | TSendOrderResultItem> {
+    if (!orderInput)
+      throw new Error('No order input');
 
-    const venueId = availableVenues[0].id;
-    await this.seiue.createOrder(venueId, {
-      capacity,
-      description,
-      dateRanges: {
-        startAt: startTime,
-        endAt: endTime,
-      },
-      timeRanges: [{
-        startAt: startTime,
-        endAt: endTime,
-      }],
+    if (!Array.isArray(orderInput)) {
+      try {
+        const order = await this.seiue.createOrder(orderInput);
+        return {
+          success: true,
+          message: '创建成功',
+          order,
+        };
+      } catch {
+        return {
+          success: false,
+          message: '创建失败',
+          order: orderInput,
+        };
+      }
+    }
+
+    // divide the orders into chunks of concurrency
+    // then use promise.allSettled for each chunk
+    concurrency = concurrency < 1 ? 1 : concurrency;
+    const runResult = [];
+    const chunks = [];
+    for (let i = 0; i < orderInput.length; i += concurrency)
+      chunks.push(orderInput.slice(i, i + concurrency));
+
+    for (const chunk of chunks) {
+      const chunkResult = await Promise.allSettled(chunk.map(order => this.seiue.createOrder(order)));
+      runResult.push(...chunkResult);
+    }
+
+    return runResult.map((result, index) => {
+      if (result.status === 'fulfilled') {
+        return {
+          success: true,
+          message: '创建成功',
+          order: result.value,
+        };
+      } else {
+        return {
+          success: false,
+          message: '创建失败',
+          order: orderInput[index],
+        };
+      }
     });
+  }
+
+  async generateOrder(orderInput: TNewOrderInput): Promise<TNewOrder> {
+    const venue = await this.findAvailableVenue(orderInput.startTime, orderInput.endTime);
+    const order = {
+      venueId: venue.id,
+      capacity: orderInput.capacity,
+      description: orderInput.description,
+      dateRanges: {
+        startAt: orderInput.startTime.split(' ')[0],
+        endAt: orderInput.endTime.split(' ')[0],
+      },
+      timeRanges: [{ startAt: orderInput.startTime, endAt: orderInput.endTime }],
+    };
+    return order;
+  }
+
+  // TODO: merge orders if they are in the same venue and total time length is less than 2 hour
+  async bulkGenerateOrder(orderInput: TNewOrderInput[]): Promise<TNewOrder[]> {
+    // make a deep copy of the venues and keep the type
+    const venues = JSON.parse(JSON.stringify(this.venues)) as TVenueList;
+
+    // for each order, find an available venue and generate an order
+    // after generating an order, update the venue's preallocatedTimes
+    // run one by one
+    const newOrders: TNewOrder[] = [];
+    for (const order of orderInput) {
+      const venue = await this.findAvailableVenue(order.startTime, order.endTime, venues);
+      const newOrder = {
+        venueId: venue.id,
+        capacity: order.capacity,
+        description: order.description,
+        dateRanges: {
+          startAt: order.startTime.split(' ')[0],
+          endAt: order.endTime.split(' ')[0],
+        },
+        timeRanges: [{ startAt: order.startTime, endAt: order.endTime }],
+      };
+      newOrders.push(newOrder);
+      venue.preallocatedTimes = [
+        ...(venue.preallocatedTimes ?? []),
+        { startAt: order.startTime, endAt: order.endTime },
+      ];
+    }
+    return newOrders;
   }
 }
