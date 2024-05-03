@@ -7,7 +7,7 @@
       <Button
         class="border border-primary shadow-md w-10 h-10 sm:w-12 sm:h-12 p-2"
         variant="outline"
-        @click="async() => await useOrderEditDialog()"
+        @click="() => useOrderEditDialog()"
       >
         <Icon icon="ph:first-aid-duotone" class="w-8 h-8 sm:w-10 sm:h-10 text-orange-500" />
       </Button>

@@ -5,7 +5,8 @@
  * @param date - The date object to be formatted.
  * @returns The formatted string representation of the date.
  */
-export function formatTimeString(date: Date) {
+
+export function formatDateTimeString(date: Date) {
   const year = date.getFullYear();
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');
@@ -13,6 +14,14 @@ export function formatTimeString(date: Date) {
   const minute = date.getMinutes().toString().padStart(2, '0');
   const second = date.getSeconds().toString().padStart(2, '0');
   return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+}
+
+export function parseSeiueDateString(dateString: string) {
+  return new Date(dateString).toISOString().split('.')[0];
+}
+
+export function transformDateToString(date: Date) {
+  return date.toISOString().split('.')[0];
 }
 
 /**
@@ -26,7 +35,7 @@ export function getMondayOfWeek() {
   const diff = date.getDate() - day + (day === 0 ? -6 : 1);
   date.setDate(diff);
   date.setHours(0, 0, 0, 0);
-  return formatTimeString(date);
+  return formatDateTimeString(date);
 }
 
 /**
@@ -40,7 +49,7 @@ export function getSundayTwoWeeksLater() {
   const diff = day === 0 ? 14 : 14 + 7 - day;
   date.setDate(date.getDate() + diff);
   date.setHours(23, 59, 59, 999);
-  return formatTimeString(date);
+  return formatDateTimeString(date);
 }
 
 export function splitCommaSeparatedString(source: string, splitSize: number) {

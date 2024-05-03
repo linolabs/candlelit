@@ -38,7 +38,7 @@
         </FormItem>
       </FormField>
       <div class="flex gap-x-2 mt-4">
-        <Button type="submit" class="font-bold text-base w-full" :disabled="isLoading">
+        <Button type="submit" class="font-bold text-base w-full space-x-2" :disabled="isLoading">
           <Icon v-if="isLoading" icon="ph:spinner" class="w-5 h-5 animate-spin" />
           保存
         </Button>
@@ -77,11 +77,12 @@
 </template>
 
 <script lang="ts" setup>
-import { createReusableTemplate, useMediaQuery } from '@vueuse/core';
+import { createReusableTemplate } from '@vueuse/core';
 import { z } from 'zod';
 import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { toast } from 'vue-sonner';
+import { parseDateTime } from '@internationalized/date';
 import { editingOrderIndexer, isOrderEditDialogOpen } from '@/composables/dialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -99,32 +100,32 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
-import { formatTimeString } from '~/utils/shared';
+// import {
+//   Drawer,
+//   DrawerContent,
+//   DrawerHeader,
+//   DrawerTitle,
+// } from '@/components/ui/drawer';
+import { formatDateTimeString } from '~/utils/shared';
 
 const schema = toTypedSchema(z.object({
-  startTime: z.date(),
-  endTime: z.date(),
+  startTime: z.string(),
+  endTime: z.string(),
   capacity: z.number(),
   description: z.string(),
 }));
 
 const bookerStore = useBookerStore();
 
-const startTime = ref<Date>(new Date());
-const endTime = ref<Date>(new Date());
+const startTime = ref<string>(transformDateToString(new Date()));
+const endTime = ref<string>(transformDateToString(new Date()));
 const isLoading = ref(false);
 
 const { handleSubmit, setValues } = useForm({
   validationSchema: schema,
   initialValues: {
-    startTime: new Date(),
-    endTime: new Date(),
+    startTime: transformDateToString(new Date()),
+    endTime: transformDateToString(new Date()),
     capacity: 10,
     description: '',
   },
@@ -132,11 +133,11 @@ const { handleSubmit, setValues } = useForm({
 
 const isAddingNewOrder = computed(() => editingOrderIndexer.value === undefined);
 
-watch(editingOrderIndexer, async (newVal) => {
+watch(editingOrderIndexer, (newVal) => {
   if (newVal === undefined) {
     setValues({
-      startTime: new Date(),
-      endTime: new Date(),
+      startTime: transformDateToString(new Date()),
+      endTime: transformDateToString(new Date()),
       capacity: 10,
       description: '',
     });
@@ -146,9 +147,11 @@ watch(editingOrderIndexer, async (newVal) => {
       setValues({
         capacity: order.capacity,
         description: order.description,
+        startTime: parseSeiueDateString(order.startTime),
+        endTime: parseSeiueDateString(order.endTime),
       });
-      startTime.value = new Date(order.startTime);
-      endTime.value = new Date(order.endTime);
+      startTime.value = parseSeiueDateString(order.startTime);
+      endTime.value = parseSeiueDateString(order.endTime);
     }
   }
 });
@@ -158,11 +161,11 @@ const onSubmit = handleSubmit(async (values) => {
   const orderInput = {
     capacity: values.capacity,
     description: values.description,
-    startTime: formatTimeString(values.startTime),
-    endTime: formatTimeString(values.endTime),
+    startTime: formatDateTimeString(parseDateTime(values.startTime).toDate('Etc/GMT')),
+    endTime: formatDateTimeString(parseDateTime(values.endTime).toDate('Etc/GMT')),
   };
   try {
-    if (editingOrderIndexer.value)
+    if (editingOrderIndexer.value !== undefined)
       await bookerStore.updateOrder(editingOrderIndexer.value, orderInput);
     else
       await bookerStore.addOrder(orderInput);

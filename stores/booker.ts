@@ -27,8 +27,8 @@ export const useBookerStore = defineStore('booker', () => {
     return {
       capacity: order.capacity,
       description: order.description,
-      startTime: new Date(order.timeRanges.startAt),
-      endTime: new Date(order.timeRanges.endAt),
+      startTime: order.timeRanges.startAt,
+      endTime: order.timeRanges.endAt,
     };
   }
 
