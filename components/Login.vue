@@ -1,5 +1,5 @@
 <template>
-  <Dialog :open="open" @update:open="toggleOpen">
+  <Dialog v-model:open="isLoginDialogOpen">
     <DialogContent class="max-w-[80vw] rounded-lg sm:max-w-[500px]">
       <DialogHeader>
         <DialogTitle>登录希悦</DialogTitle>
@@ -55,7 +55,6 @@
 import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { z } from 'zod';
-import { Icon } from '@iconify/vue';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -73,12 +72,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
-const props = defineProps<{
-  open: boolean;
-  toggleOpen: (value?: boolean | undefined) => boolean;
-}>();
-
-const emit = defineEmits(['loginSuccess']);
+import { isLoginDialogOpen } from '~/composables/dialog';
 
 const formSchema = toTypedSchema(z.object({
   schoolId: z.string().min(1, '校卡号不能为空'),
@@ -89,13 +83,14 @@ const form = useForm({
   validationSchema: formSchema,
 });
 
-const store = useStore();
+const bookerStore = useBookerStore();
+const userStore = useUserStore();
 
 const onSubmit = form.handleSubmit(async (values) => {
-  const success = await store.login(values);
+  const success = await userStore.login(values);
   if (success) {
-    emit('loginSuccess');
-    props.toggleOpen();
+    isLoginDialogOpen.value = false;
+    await bookerStore.fetchVenueList();
   }
 });
 </script>

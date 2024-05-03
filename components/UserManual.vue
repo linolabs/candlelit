@@ -1,6 +1,6 @@
 <template>
   <Dialog :open="open" @update:open="toggleOpen">
-    <DialogContent>
+    <DialogContent class="rounded-lg max-w-[90vw]">
       <DialogHeader>
         <DialogTitle>用户手册</DialogTitle>
       </DialogHeader>

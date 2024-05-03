@@ -1,7 +1,6 @@
 export interface TTimeRangeItem {
   startAt: string;
   endAt: string;
-
 }
 
 export interface TVenue {
@@ -29,17 +28,21 @@ export interface TOrder {
 }
 
 export interface TNewOrder {
-  venueId: number;
+  venue: {
+    id: number;
+    name: string;
+  };
   capacity: number;
   description: string;
   dateRanges: {
     startAt: string;
     endAt: string;
   };
-  timeRanges: {
-    startAt: string;
-    endAt: string;
-  }[];
+  /**
+   *  In our case, we only have one time range in each order.
+   *  Still, seiue requires an **array** of time ranges in request body.
+   */
+  timeRanges: TTimeRangeItem;
 }
 
 export interface TNewOrderInput {

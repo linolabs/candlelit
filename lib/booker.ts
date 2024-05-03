@@ -8,19 +8,12 @@ export interface TSortOptions {
 
 export class Booker {
   private seiue: Seiue;
-  private venues: TVenueList;
 
-  constructor(seiue: Seiue, venues: TVenueList) {
+  constructor(seiue: Seiue) {
     this.seiue = seiue;
-    this.venues = this.sortVenues(venues);
   }
 
-  static async init(seiue: Seiue): Promise<Booker> {
-    const venues = await seiue.getVenueList();
-    return new Booker(seiue, venues);
-  }
-
-  isTimeRangeValid(startTime: Date, endTime: Date, venue: TVenue): boolean {
+  static isTimeRangeValid(startTime: Date, endTime: Date, venue: TVenue): boolean {
     const startHour = startTime.getHours() + startTime.getMinutes() / 60;
     const endHour = endTime.getHours() + endTime.getMinutes() / 60;
 
@@ -40,7 +33,7 @@ export class Booker {
     return false;
   }
 
-  async _isVenueAvailable(venueId: number, startTime: string, endTime: string, venueSource: TVenueList = this.venues): Promise<boolean> {
+  static async _isVenueAvailable(venueId: number, startTime: string, endTime: string, venueSource: TVenueList): Promise<boolean> {
     const venue = venueSource.find(({ id }) => id === venueId);
     if (!venue)
       return false;
@@ -66,27 +59,27 @@ export class Booker {
     return true;
   }
 
-  async findAvailableVenue(startTime: string, endTime: string, venueSource: TVenueList = this.venues): Promise<TVenue> {
+  static async findAvailableVenue(startTime: string, endTime: string, venueSource: TVenueList): Promise<TVenue> {
     // Find the first available venue
     for (const venue of venueSource) {
       if (await this._isVenueAvailable(venue.id, startTime, endTime, venueSource))
         return venue;
     }
     // If for loop ends without returning, no venue is available
-    throw new Error('No venue available');
+    throw new Error('好像没有可用的场地，检查一下时间吧');
   }
 
-  async findAvailableVenuesAll(startTime: string, endTime: string, venueSource: TVenueList = this.venues): Promise<TVenueList> {
-    const venues = await Promise.all(this.venues.map(async (venue) => {
+  static async findAvailableVenuesAll(startTime: string, endTime: string, venueSource: TVenueList): Promise<TVenueList> {
+    const venues = await Promise.all(venueSource.map(async (venue) => {
       return (await this._isVenueAvailable(venue.id, startTime, endTime, venueSource)) ? venue : {} as TVenue;
     }));
     if (venues.length === 0)
-      throw new Error('No venue available');
+      throw new Error('好像没有可用的场地，检查一下时间吧');
     return venues.filter(venue => venue.id !== undefined);
   }
 
-  sortVenues(
-    venues: TVenueList = this.venues,
+  static sortVenues(
+    venues: TVenueList,
     options: TSortOptions = { firstSortBy: 'floor', buildingOrder: { B: 0, C: 1, A: 2, D: 3 } },
   ) {
     const { firstSortBy, buildingOrder } = options;
@@ -117,6 +110,36 @@ export class Booker {
       // If all else fails, return 0 (stable sort)
       return 0;
     });
+  }
+
+  static async generateOrder(orderInput: TNewOrderInput, venueSource: TVenueList): Promise<TNewOrder> {
+    const venue = await this.findAvailableVenue(orderInput.startTime, orderInput.endTime, venueSource);
+    const order = {
+      venue: {
+        id: venue.id,
+        name: venue.name,
+      },
+      capacity: orderInput.capacity,
+      description: orderInput.description,
+      dateRanges: {
+        startAt: orderInput.startTime.split(' ')[0],
+        endAt: orderInput.endTime.split(' ')[0],
+      },
+      timeRanges: { startAt: orderInput.startTime, endAt: orderInput.endTime },
+    };
+    // Update the venue's preallocatedTimes
+    venue.preallocatedTimes = [
+      ...(venue.preallocatedTimes ?? []),
+      { startAt: orderInput.startTime, endAt: orderInput.endTime },
+    ];
+    return order;
+  }
+
+  static async bulkGenerateOrder(orderInput: TNewOrderInput[], venueSource: TVenueList): Promise<TNewOrder[]> {
+    const newOrders: TNewOrder[] = [];
+    for (const order of orderInput)
+      newOrders.push(await this.generateOrder(order, venueSource));
+    return newOrders;
   }
 
   /**
@@ -177,50 +200,5 @@ export class Booker {
         };
       }
     });
-  }
-
-  async generateOrder(orderInput: TNewOrderInput): Promise<TNewOrder> {
-    const venue = await this.findAvailableVenue(orderInput.startTime, orderInput.endTime);
-    const order = {
-      venueId: venue.id,
-      capacity: orderInput.capacity,
-      description: orderInput.description,
-      dateRanges: {
-        startAt: orderInput.startTime.split(' ')[0],
-        endAt: orderInput.endTime.split(' ')[0],
-      },
-      timeRanges: [{ startAt: orderInput.startTime, endAt: orderInput.endTime }],
-    };
-    return order;
-  }
-
-  // TODO: merge orders if they are in the same venue and total time length is less than 2 hour
-  async bulkGenerateOrder(orderInput: TNewOrderInput[]): Promise<TNewOrder[]> {
-    // make a deep copy of the venues and keep the type
-    const venues = JSON.parse(JSON.stringify(this.venues)) as TVenueList;
-
-    // for each order, find an available venue and generate an order
-    // after generating an order, update the venue's preallocatedTimes
-    // run one by one
-    const newOrders: TNewOrder[] = [];
-    for (const order of orderInput) {
-      const venue = await this.findAvailableVenue(order.startTime, order.endTime, venues);
-      const newOrder = {
-        venueId: venue.id,
-        capacity: order.capacity,
-        description: order.description,
-        dateRanges: {
-          startAt: order.startTime.split(' ')[0],
-          endAt: order.endTime.split(' ')[0],
-        },
-        timeRanges: [{ startAt: order.startTime, endAt: order.endTime }],
-      };
-      newOrders.push(newOrder);
-      venue.preallocatedTimes = [
-        ...(venue.preallocatedTimes ?? []),
-        { startAt: order.startTime, endAt: order.endTime },
-      ];
-    }
-    return newOrders;
   }
 }

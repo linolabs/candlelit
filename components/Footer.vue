@@ -1,5 +1,5 @@
 <template>
-  <section class="flex justify-center items-center space-x-4 absolute bottom-2 left-1/2 -translate-x-1/2">
+  <section class="w-full flex justify-center items-center space-x-4 absolute bottom-2 left-1/2 -translate-x-1/2">
     <span>
       <NuxtLink to="https://github.com/linolabs/candlelit">
         <Icon icon="ph:github-logo-duotone" class="h-5 w-5" />
@@ -16,7 +16,6 @@
 </template>
 
 <script setup lang="ts">
-import { Icon } from '@iconify/vue';
 import { Separator } from '@/components/ui/separator';
 
 const [isUserManualOpen, toggleUserManualOpen] = useToggle(false);

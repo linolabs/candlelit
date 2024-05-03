@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   if (!result.success)
     throw result.error.issues;
   const { schoolId, password } = result.data;
-  const seiue = await Seiue.init(schoolId, password);
+  const seiue = await Seiue.init({ schoolId, password });
   if (!seiue)
     return { success: false as const, message: '登录失败，请检查输入的信息' };
   return { success: true as const, message: '登录成功', ...seiue.user() };
