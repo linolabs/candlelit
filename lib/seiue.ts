@@ -97,6 +97,25 @@ export class Seiue {
     return { accessToken: this.accessToken, activeReflectionId: this.activeReflectionId };
   }
 
+  static async checkTokenStatus(accessToken: string) {
+    try {
+      await ofetch(`${SEIUE_API_URL}/chalk/oauth/info`, {
+        method: 'HEAD',
+        headers: {
+          'accept': ' application/json, text/plain, */*',
+          'accept-language': ' zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
+          'authorization': `Bearer ${accessToken}`,
+          'origin': 'https://chalk-c3.seiue.com',
+          'referer': 'https://chalk-c3.seiue.com/',
+          'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0',
+        },
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   /**
    * Retrieves calendar events for the specified venue IDs.
    *
@@ -105,7 +124,7 @@ export class Seiue {
    * @param venueIds - The IDs of the venues to retrieve calendar events for.
    * @param splitSize - The number of venue IDs to include in each API request. Defaults to 1.
    */
-  async getCalendarEvents(venueIds: string, splitSize: number = 1): Promise<TSeiueCalenderEventResponse> {
+  async getCalendarEvents(venueIds: string, splitSize: number = 1): Promise < TSeiueCalenderEventResponse > {
     const venueIdGroups = splitCommaSeparatedString(venueIds, splitSize);
     const calendarEvents = await Promise.all(
       venueIdGroups.map(
@@ -131,7 +150,7 @@ export class Seiue {
    * @param venueIds - The IDs of the venues to retrieve order times for.
    * @param splitSize - The number of venue IDs to include in each API request. Defaults to 3.
    */
-  async getOrderTimes(venueIds: string, splitSize: number = 3): Promise<TSeiueOrderTimesResponse> {
+  async getOrderTimes(venueIds: string, splitSize: number = 3): Promise < TSeiueOrderTimesResponse > {
     const venueIdGroups = splitCommaSeparatedString(venueIds, splitSize);
     const orderTimes = await Promise.all(
       venueIdGroups.map(
@@ -150,7 +169,7 @@ export class Seiue {
     return orderTimes.flat();
   }
 
-  async getVenueList(): Promise<TVenueList> {
+  async getVenueList(): Promise < TVenueList > {
     const venueRes = await this.fetcher<TSeiueVenueResponse>(`${SEIUE_API_URL}/scms/venue/order-venues`, {
       method: 'GET',
       params: {
@@ -191,7 +210,7 @@ export class Seiue {
     return venues;
   }
 
-  async createOrder(order: TNewOrder): Promise<TOrder> {
+  async createOrder(order: TNewOrder): Promise < TOrder > {
     const res = await this.fetcher<TSeiueOrderDetailResponse>(`${SEIUE_API_URL}/scms/venue/order-venues/${order.venue.id}/orders`, {
       method: 'POST',
       body: {
@@ -216,7 +235,7 @@ export class Seiue {
     };
   }
 
-  async getOrderDetail(orderId: number): Promise<TOrder> {
+  async getOrderDetail(orderId: number): Promise < TOrder > {
     const res = await this.fetcher<TSeiueOrderDetailResponse>(`${SEIUE_API_URL}/scms/venue/orders/${orderId}`);
 
     return {
@@ -229,7 +248,7 @@ export class Seiue {
     };
   }
 
-  async getMyOrders(): Promise<TOrder[]> {
+  async getMyOrders(): Promise < TOrder[] > {
     const res = await this.fetcher<TSeiueMyOrdersResponse>(`${SEIUE_API_URL}/scms/venue/my-orders`, {
       params: {
         expand: 'order_times,venue',

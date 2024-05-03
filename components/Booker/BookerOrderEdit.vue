@@ -158,11 +158,15 @@ watch(editingOrderIndexer, (newVal) => {
 
 const onSubmit = handleSubmit(async (values) => {
   isLoading.value = true;
+  const startTime = parseDateTime(values.startTime).toDate('Etc/GMT');
+  const endTime = parseDateTime(values.endTime).toDate('Etc/GMT');
+  startTime.setSeconds(0);
+  endTime.setSeconds(0);
   const orderInput = {
     capacity: values.capacity,
     description: values.description,
-    startTime: formatDateTimeString(parseDateTime(values.startTime).toDate('Etc/GMT')),
-    endTime: formatDateTimeString(parseDateTime(values.endTime).toDate('Etc/GMT')),
+    startTime: formatDateTimeString(startTime),
+    endTime: formatDateTimeString(endTime),
   };
   try {
     if (editingOrderIndexer.value !== undefined)

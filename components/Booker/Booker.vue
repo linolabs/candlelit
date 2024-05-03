@@ -3,9 +3,6 @@
     <BookerOptions />
     <BookerOrderList />
     <BookerOrderEdit />
+    <BookerSendOrder />
   </div>
 </template>
-
-<script setup lang="ts">
-
-</script>

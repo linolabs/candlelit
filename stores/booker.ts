@@ -1,7 +1,7 @@
 import { useUserStore } from '#imports';
 import { Seiue } from '~/lib/seiue';
 import { Booker } from '~/lib/booker';
-import type { TNewOrder, TNewOrderInput, TOrderStoreItem, TSortOptions, TVenueList } from '~/types';
+import type { TNewOrderInput, TOrderStoreItem, TSortOptions, TVenueList } from '~/types';
 
 export const useBookerStore = defineStore('booker', () => {
   const userStore = useUserStore();
@@ -73,6 +73,19 @@ export const useBookerStore = defineStore('booker', () => {
     venueList.value = undefined;
   }
 
+  async function sendOrder() {
+    if (!userStore.loggedIn
+      || !userStore.accessToken
+      || !userStore.activeReflectionId
+      || !(await Seiue.checkTokenStatus(userStore.accessToken))
+      || orderList.value.length === 0
+    )
+      return;
+    const seiue = new Seiue(userStore.accessToken, userStore.activeReflectionId);
+    const booker = new Booker(seiue);
+    return await booker.sendOrder(orderList.value);
+  }
+
   watch(sortOptions, () => {
     if (venueList.value)
       venueList.value = Booker.sortVenues(venueList.value, sortOptions.value);
@@ -85,6 +98,7 @@ export const useBookerStore = defineStore('booker', () => {
     getOrder,
     removeOrder,
     addOrder,
+    sendOrder,
     clearOrderList,
     updateOrder,
     fetchVenueList,

@@ -1,5 +1,8 @@
 <template>
-  <div class="rounded border border-primary px-4 py-2 space-y-1 cursor-pointer mx-2 md:w-2/3" @click="useOrderEditDialog(order.orderIndexer)">
+  <div
+    :class="cn('rounded border border-primary px-4 py-2 space-y-1 mx-2 md:w-2/3', !noEdit && 'cursor-pointer ')"
+    @click="handleClick"
+  >
     <div class="flex justify-start items-center gap-x-2 mx-auto">
       <span>{{ startTimeLabel }}</span>
       <Icon icon="ph:arrow-circle-right-duotone" />
@@ -24,11 +27,21 @@
 
 <script setup lang="ts">
 import { useDateFormat } from '@vueuse/core';
-import type { TOrderStoreItem } from '~/types';
+import { cn } from '@/lib/ui-utils';
+import type { TNewOrder, TOrderStoreItem } from '~/types';
 
 const props = defineProps<{
   order: TOrderStoreItem;
+  noEdit: false | undefined;
+} | {
+  order: TNewOrder;
+  noEdit: true;
 }>();
+
+function handleClick() {
+  if (!props.noEdit)
+    useOrderEditDialog(props.order.orderIndexer);
+}
 
 const startTimeLabel = useDateFormat(new Date(props.order.timeRanges.startAt), 'YYYY/MM/DD HH:mm');
 const endTimeLabel = useDateFormat(new Date(props.order.timeRanges.endAt), 'YYYY/MM/DD HH:mm');
