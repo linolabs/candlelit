@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded border border-primary px-4 py-2 space-y-1 cursor-pointer w-2/3" @click="useOrderEditDialog(order.orderIndexer)">
+  <div class="rounded border border-primary px-4 py-2 space-y-1 cursor-pointer mx-2 md:w-2/3" @click="useOrderEditDialog(order.orderIndexer)">
     <div class="flex justify-start items-center gap-x-2 mx-auto">
       <span>{{ startTimeLabel }}</span>
       <Icon icon="ph:arrow-circle-right-duotone" />

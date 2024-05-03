@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-2 w-full h-auto">
+  <div class="space-y-1 w-full h-auto">
     <h5 class="text-lg font-bold">
       预约列表
     </h5>

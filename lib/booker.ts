@@ -1,10 +1,5 @@
 import type { Seiue } from './seiue';
-import type { TNewOrder, TNewOrderInput, TSendOrderResult, TSendOrderResultItem, TVenue, TVenueList } from '~/types';
-
-export interface TSortOptions {
-  firstSortBy: 'floor' | 'building';
-  buildingOrder: { [key: string]: number };
-}
+import type { TNewOrder, TNewOrderInput, TSendOrderResult, TSendOrderResultItem, TSortOptions, TVenue, TVenueList } from '~/types';
 
 export class Booker {
   private seiue: Seiue;
@@ -80,7 +75,7 @@ export class Booker {
 
   static sortVenues(
     venues: TVenueList,
-    options: TSortOptions = { firstSortBy: 'floor', buildingOrder: { B: 0, C: 1, A: 2, D: 3 } },
+    options: TSortOptions = { firstSortBy: 'floor', buildingOrder: ['B', 'C', 'A', 'D'] },
   ) {
     const { firstSortBy, buildingOrder } = options;
 
@@ -93,10 +88,10 @@ export class Booker {
           return 1;
 
         // Then, sort by building
-        return buildingOrder[a.building] - buildingOrder[b.building];
+        return buildingOrder.indexOf(a.building) - buildingOrder.indexOf(b.building);
       } else {
         // First, sort by building
-        const buildingCompare = buildingOrder[a.building] - buildingOrder[b.building];
+        const buildingCompare = buildingOrder.indexOf(a.building) - buildingOrder.indexOf(b.building);
         if (buildingCompare !== 0)
           return buildingCompare;
 

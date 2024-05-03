@@ -17,7 +17,10 @@ export interface TVenue {
 }
 
 export type TVenueList = TVenue[];
-
+export interface TSortOptions {
+  firstSortBy: 'floor' | 'building';
+  buildingOrder: string[];
+}
 export interface TOrder {
   id: number;
   capacity: number;

@@ -56,7 +56,7 @@
   </UseTemplate>
 
   <Dialog v-model:open="isOrderEditDialogOpen">
-    <DialogContent class="max-w-[90vw] rounded-lg">
+    <DialogContent class="max-w-[90vw] sm:max-w-[500px] rounded-lg">
       <DialogHeader>
         <DialogTitle>
           {{ isAddingNewOrder ? '添加新的预约' : '编辑预约' }}

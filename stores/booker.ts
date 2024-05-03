@@ -1,13 +1,17 @@
 import { useUserStore } from '#imports';
 import { Seiue } from '~/lib/seiue';
 import { Booker } from '~/lib/booker';
-import type { TNewOrder, TNewOrderInput, TOrderStoreItem, TVenueList } from '~/types';
+import type { TNewOrder, TNewOrderInput, TOrderStoreItem, TSortOptions, TVenueList } from '~/types';
 
 export const useBookerStore = defineStore('booker', () => {
   const userStore = useUserStore();
   const orderList = ref<(TOrderStoreItem)[]>([]);
   const venueList = ref<TVenueList>();
   const orderIndexer = ref(0);
+  const sortOptions = ref<TSortOptions>({
+    firstSortBy: 'floor',
+    buildingOrder: ['B', 'C', 'A', 'D'],
+  });
 
   async function addOrder(order: TNewOrderInput) {
     if (!venueList.value)
@@ -62,21 +66,27 @@ export const useBookerStore = defineStore('booker', () => {
     if (!userStore.loggedIn)
       return;
     const seiue = new Seiue(userStore.accessToken as string, userStore.activeReflectionId as number);
-    venueList.value = await seiue.getVenueList();
+    venueList.value = Booker.sortVenues(await seiue.getVenueList(), sortOptions.value);
   }
 
   function clearVenueList() {
     venueList.value = undefined;
   }
 
+  watch(sortOptions, () => {
+    if (venueList.value)
+      venueList.value = Booker.sortVenues(venueList.value, sortOptions.value);
+  }, { deep: true });
+
   return {
     orderList,
+    venueList,
+    sortOptions,
     getOrder,
     removeOrder,
     addOrder,
     clearOrderList,
     updateOrder,
-    venueList,
     fetchVenueList,
     clearVenueList,
   };

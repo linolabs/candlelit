@@ -16,6 +16,7 @@
       <PopoverContent class="w-auto p-0 grid grid-cols-1 auto-cols-min">
         <Calendar
           v-model="selectedDate"
+          :min-value="today"
           class="col-span-1 z-30"
           locale="zh-CN"
         />
@@ -63,6 +64,11 @@ const model = defineModel<string>('time', { required: true });
 
 const df = new DateFormatter('zh-CN', {
   dateStyle: 'long',
+});
+
+const today = computed(() => {
+  const date = new Date();
+  return new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
 });
 
 const selectedDate = computed<DateValue>(
