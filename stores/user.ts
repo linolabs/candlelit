@@ -24,12 +24,13 @@ export const useUserStore = defineStore('user', () => {
     return res.success;
   }
 
-  function logout() {
+  function logout(noToast?: boolean) {
     loggedIn.value = false;
     accessToken.value = undefined;
     activeReflectionId.value = undefined;
     bookerStore.clearVenueList();
-    toast.success('退出登录成功');
+    if (!noToast)
+      toast.success('退出登录成功');
   }
 
   async function checkLogin() {

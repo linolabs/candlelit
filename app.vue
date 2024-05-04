@@ -13,7 +13,7 @@ onMounted(async () => {
   const userStore = useUserStore();
   const check = await userStore.checkLogin();
   if (!check) {
-    userStore.logout();
+    userStore.logout(true);
     toast.warning('登录过期，请重新登录');
   }
 
