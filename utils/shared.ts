@@ -1,7 +1,7 @@
-import { CalendarDateTime, endOfWeek, startOfWeek } from '@internationalized/date';
+import { CalendarDateTime, endOfWeek, parseDateTime, startOfWeek } from '@internationalized/date';
 
 export function parseSeiueDateString(dateString: string) {
-  return new Date(dateString).toISOString().split('.')[0];
+  return parseDateTime(dateString.replace(' ', 'T')).toString();
 }
 /**
  * Note: seconds are set to 0.
