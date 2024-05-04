@@ -7,7 +7,9 @@ export const isOrderEditDialogOpen = ref(false);
 export const editingOrderIndexer = ref<number | undefined>();
 
 /**
- * Please **explicity** pass `undefined` when used for adding new order.
+ * Note: Pass `undefined` explicitly if used directly in `@click`,
+ * otherwise indexer will be a PointerEvent object which breaks the functionality.
+ * Or wrap it in a arrow function to avoid this.
  * @param indexer
  */
 export async function useOrderEditDialog(indexer?: number) {
