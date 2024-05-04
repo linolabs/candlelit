@@ -1,5 +1,5 @@
 <template>
-  <section class="w-full flex justify-center items-center space-x-4 absolute bottom-2 left-1/2 -translate-x-1/2">
+  <section class="flex h-5 items-center space-x-4 text-sm mt-auto min">
     <span>
       <NuxtLink to="https://github.com/linolabs/candlelit">
         <Icon icon="ph:github-logo-duotone" class="h-5 w-5" />

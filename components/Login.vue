@@ -43,7 +43,8 @@
             <FormMessage />
           </FormItem>
         </FormField>
-        <Button type="submit" class="font-bold text-base w-full mt-2">
+        <Button type="submit" class="font-bold text-base w-full mt-2" :disabled="isLoading">
+          <Icon v-if="isLoading" icon="ph:spinner" class="w-5 h-5 mr-2 animate-spin" />
           登录
         </Button>
       </form>
@@ -86,8 +87,12 @@ const form = useForm({
 const bookerStore = useBookerStore();
 const userStore = useUserStore();
 
+const isLoading = ref(false);
+
 const onSubmit = form.handleSubmit(async (values) => {
+  isLoading.value = true;
   const success = await userStore.login(values);
+  isLoading.value = false;
   if (success) {
     isLoginDialogOpen.value = false;
     await bookerStore.fetchVenueList();

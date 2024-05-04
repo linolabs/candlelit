@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-col justify-center items-center gap-y-20">
-    <Hero />
-    <div class="w-[80vw] max-w-[600px] space-y-8">
+  <div class="flex flex-col justify-center min-h-screen items-center py-4 font-sans">
+    <Hero class="my-10" />
+    <div class="w-[80vw] max-w-[600px] space-y-8 flex-1 mb-4">
       <SeiueStatus />
       <Booker />
     </div>
@@ -20,7 +20,7 @@ useHead({
     },
   ],
   bodyAttrs: {
-    class: 'min-h-screen w-full grid grid-cols-1 content-center',
+    class: '',
   },
 });
 </script>
