@@ -3,7 +3,7 @@
     <h5 class="text-lg font-bold">
       预约列表
     </h5>
-    <div class="rounded border border-primary shadow w-full px-2 py-4 grid grid-cols-1 justify-items-center gap-y-4">
+    <div class="rounded border border-primary shadow w-full px-4 py-4 grid grid-cols-1 justify-items-center gap-y-4">
       <Button
         class="border border-primary shadow-md w-10 h-10 sm:w-12 sm:h-12 p-2"
         variant="outline"

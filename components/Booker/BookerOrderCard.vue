@@ -1,11 +1,11 @@
 <template>
   <div
-    :class="cn('rounded border border-primary px-4 py-2 space-y-1 mx-2 md:w-2/3', !noEdit && 'cursor-pointer ')"
+    :class="cn('rounded border border-primary px-1 sm:px-4 py-2 space-y-1 w-full sm:max-w-[80%]', !noEdit && 'cursor-pointer ')"
     @click="handleClick"
   >
-    <div class="flex justify-start items-center gap-x-2 mx-auto">
+    <div class="flex justify-start items-center gap-x-2 mx-auto text-wrap break-all">
       <span>{{ startTimeLabel }}</span>
-      <Icon icon="ph:arrow-circle-right-duotone" />
+      <Icon icon="ph:arrow-circle-right-duotone" class="min-w-5 min-h-5 sm:mx-2" />
       <span>{{ endTimeLabel }}</span>
     </div>
     <div class="flex gap-x-2">
@@ -17,9 +17,9 @@
         <Icon icon="ph:users-duotone" class="w-4 h-4" />
         {{ order.capacity }}
       </span>
-      <span class="px-1 rounded bg-secondary text-primary truncate max-w-md flex items-center gap-x-1">
-        <Icon icon="ph:quotes-duotone" class="w-4 h-4" />
-        {{ order.description }}
+      <span class="px-1 rounded bg-secondary truncate text-primary max-w-sm flex items-center gap-x-1">
+        <Icon icon="ph:quotes-duotone" class="min-h-4 min-w-4 max-w-4 max-h-4" />
+        <span class="truncate w-auto">{{ order.description }}</span>
       </span>
     </div>
   </div>
