@@ -22,7 +22,7 @@
         <div class="flex items-center space-x-2">
           <TransitionGroup name="list">
             <template v-for="(building, index) in sortOptions.buildingOrder" :key="sortOptions.buildingOrder[index]">
-              <div class="grid grid-cols-1 justify-items-center	gap-y-1">
+              <div class="grid grid-cols-1 justify-items-center gap-y-1">
                 <span class="flex items-center justify-center font-bold shadow w-8 h-8 rounded-sm border border-primary">
                   {{ building }}
                 </span>

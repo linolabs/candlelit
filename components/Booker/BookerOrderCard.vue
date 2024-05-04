@@ -32,7 +32,7 @@ import type { TNewOrder, TOrderStoreItem } from '~/types';
 
 const props = defineProps<{
   order: TOrderStoreItem;
-  noEdit: false | undefined;
+  noEdit?: false;
 } | {
   order: TNewOrder;
   noEdit: true;

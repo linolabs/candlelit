@@ -9,7 +9,6 @@
         {{ timeCheckResult.message }}
       </AlertDescription>
     </Alert>
-
   </div>
 </template>
 
@@ -34,5 +33,4 @@ const timeCheckResult = computed<{ icon: string; message: string; className: str
     ? { icon: 'ph:check-circle-duotone', message: 'Congrats! 时间合法', className: 'text-green-600 border-green-600 [&>svg]:text-green-600' }
     : { icon: 'ph:x-circle-duotone', message: 'Uh oh. 时间不合法', className: 'text-red-600 border-red-600 [&>svg]:text-red-600' };
 });
-
 </script>
