@@ -38,8 +38,8 @@
         </FormItem>
       </FormField>
       <div class="flex gap-x-2 mt-4">
-        <Button type="submit" class="font-bold text-base w-full space-x-2" :disabled="isLoading">
-          <Icon v-if="isLoading" icon="ph:spinner" class="w-5 h-5 animate-spin" />
+        <Button type="submit" class="font-bold text-base w-full" :disabled="isLoading">
+          <Icon v-if="isLoading" icon="ph:spinner" class="w-5 h-5 animate-spin mr-2" />
           保存
         </Button>
         <Button
@@ -106,7 +106,7 @@ import {
 //   DrawerHeader,
 //   DrawerTitle,
 // } from '@/components/ui/drawer';
-import { formatDateTimeString } from '~/utils/shared';
+import { todayInTimeString } from '~/utils/shared';
 
 const schema = toTypedSchema(z.object({
   startTime: z.string(),
@@ -117,15 +117,17 @@ const schema = toTypedSchema(z.object({
 
 const bookerStore = useBookerStore();
 
-const startTime = ref<string>(transformDateToString(new Date()));
-const endTime = ref<string>(transformDateToString(new Date()));
+const today = todayInTimeString();
+
+const startTime = ref<string>(today);
+const endTime = ref<string>(today);
 const isLoading = ref(false);
 
 const { handleSubmit, setValues } = useForm({
   validationSchema: schema,
   initialValues: {
-    startTime: transformDateToString(new Date()),
-    endTime: transformDateToString(new Date()),
+    startTime: todayInTimeString(),
+    endTime: todayInTimeString(),
     capacity: 10,
     description: '',
   },
@@ -136,8 +138,8 @@ const isAddingNewOrder = computed(() => editingOrderIndexer.value === undefined)
 watch(editingOrderIndexer, (newVal) => {
   if (newVal === undefined) {
     setValues({
-      startTime: transformDateToString(new Date()),
-      endTime: transformDateToString(new Date()),
+      startTime: todayInTimeString(),
+      endTime: todayInTimeString(),
       capacity: 10,
       description: '',
     });
@@ -158,15 +160,15 @@ watch(editingOrderIndexer, (newVal) => {
 
 const onSubmit = handleSubmit(async (values) => {
   isLoading.value = true;
-  const startTime = parseDateTime(values.startTime).toDate('Etc/GMT');
-  const endTime = parseDateTime(values.endTime).toDate('Etc/GMT');
-  startTime.setSeconds(0);
-  endTime.setSeconds(0);
+  const startTime = parseDateTime(values.startTime);
+  const endTime = parseDateTime(values.endTime);
+  startTime.set({ second: 0 });
+  endTime.set({ second: 0 });
   const orderInput = {
     capacity: values.capacity,
     description: values.description,
-    startTime: formatDateTimeString(startTime),
-    endTime: formatDateTimeString(endTime),
+    startTime: startTime.toString(),
+    endTime: endTime.toString(),
   };
   try {
     if (editingOrderIndexer.value !== undefined)

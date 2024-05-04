@@ -6,22 +6,31 @@
  * @returns The formatted string representation of the date.
  */
 
-export function formatDateTimeString(date: Date) {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  const hour = date.getHours().toString().padStart(2, '0');
-  const minute = date.getMinutes().toString().padStart(2, '0');
-  const second = date.getSeconds().toString().padStart(2, '0');
-  return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
-}
+import { CalendarDateTime, endOfWeek, startOfWeek } from '@internationalized/date';
 
 export function parseSeiueDateString(dateString: string) {
   return new Date(dateString).toISOString().split('.')[0];
 }
 
-export function transformDateToString(date: Date) {
-  return date.toISOString().split('.')[0];
+export function todayInCalendarDateTime() {
+  const todayInTimeStringFromDate = (new Date()).toLocaleString('en-GB', { timeZone: 'Asia/Shanghai' });
+  const regex = /^(\d{2})\/(\d{2})\/(\d{4}), (\d{2}):(\d{2}):(\d{2})$/;
+  const [_, day, month, year, hour, minute] = todayInTimeStringFromDate.match(regex)!;
+  return (new CalendarDateTime(
+    Number.parseInt(year),
+    Number.parseInt(month),
+    Number.parseInt(day),
+    Number.parseInt(hour),
+    Number.parseInt(minute),
+    0, // seconds should always be 0
+  ));
+}
+export function todayInTimeString() {
+  return todayInCalendarDateTime().toString();
+}
+
+export function toSeiueString(date: CalendarDateTime) {
+  return date.toString().replace('T', ' ');
 }
 
 /**
@@ -30,12 +39,8 @@ export function transformDateToString(date: Date) {
  * @returns Time string in the format of 'YYYY-MM-DD HH:mm:ss'.
  */
 export function getMondayOfWeek() {
-  const date = new Date((new Date()).toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
-  const day = date.getDay();
-  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-  date.setDate(diff);
-  date.setHours(0, 0, 0, 0);
-  return formatDateTimeString(date);
+  const date = todayInCalendarDateTime();
+  return toSeiueString(startOfWeek(date, 'zh-CN'));
 }
 
 /**
@@ -44,12 +49,8 @@ export function getMondayOfWeek() {
  * @returns Time string in the format of 'YYYY-MM-DD HH:mm:ss'.
  */
 export function getSundayTwoWeeksLater() {
-  const date = new Date((new Date()).toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
-  const day = date.getDay();
-  const diff = day === 0 ? 14 : 14 + 7 - day;
-  date.setDate(date.getDate() + diff);
-  date.setHours(23, 59, 59, 999);
-  return formatDateTimeString(date);
+  const date = todayInCalendarDateTime();
+  return toSeiueString(endOfWeek(date.add({ weeks: 2 }), 'zh-CN').set({ second: 59, minute: 59, hour: 23 }));
 }
 
 export function splitCommaSeparatedString(source: string, splitSize: number) {

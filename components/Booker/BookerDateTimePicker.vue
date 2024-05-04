@@ -9,14 +9,14 @@
             !selectedDate && 'text-muted-foreground',
           )"
         >
-          <Icon icon="ph:calendar-dots-duotone" class="h-5 w-5 mr-4" :ssr="true" />
+          <Icon icon="ph:calendar-dots-duotone" class="h-5 w-5 mr-4" />
           {{ selectedDateTimeString ?? "选择一个时间点" }}
         </Button>
       </PopoverTrigger>
       <PopoverContent class="w-auto p-0 grid grid-cols-1 auto-cols-min">
         <Calendar
           v-model="selectedDate"
-          :min-value="today"
+          :min-value="todayInCalendarDateTime()"
           class="col-span-1 z-30"
           locale="zh-CN"
         />
@@ -46,12 +46,13 @@
 </template>
 
 <script setup lang="ts">
-import {
+import type {
   CalendarDate,
+} from '@internationalized/date';
+import {
   DateFormatter,
-  type DateValue,
-  parseDate,
   parseDateTime,
+  toCalendarDate,
 } from '@internationalized/date';
 
 import { Calendar } from '@/components/ui/calendar';
@@ -60,27 +61,22 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/ui-utils';
 import { Input } from '@/components/ui/input';
 
+import { todayInCalendarDateTime } from '~/utils/shared';
+
 const model = defineModel<string>('time', { required: true });
 
 const df = new DateFormatter('zh-CN', {
   dateStyle: 'long',
 });
 
-const today = computed(() => {
-  const date = new Date();
-  return new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
-});
-
-const selectedDate = computed<DateValue>(
+const selectedDate = computed<CalendarDate>(
   {
     get: () => {
-      const date = parseDateTime(model.value).toDate('Etc/GMT');
-      return new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
+      return toCalendarDate(parseDateTime(model.value));
     },
     set(value) {
-      const modelDate = parseDateTime(model.value).toDate('Etc/GMT');
-      modelDate.setFullYear(value.year, value.month - 1, value.day);
-      model.value = transformDateToString(modelDate);
+      const modelDate = parseDateTime(model.value);
+      model.value = modelDate.set({ year: value.year, month: value.month, day: value.day }).toString();
     },
   },
 );
@@ -88,12 +84,11 @@ const selectedDate = computed<DateValue>(
 const selectedHour = computed<number>(
   {
     get() {
-      return parseDateTime(model.value).toDate('Etc/GMT').getHours();
+      return parseDateTime(model.value).hour;
     },
     set(value) {
-      const modelDate = parseDateTime(model.value).toDate('Etc/GMT');
-      modelDate.setHours(value);
-      model.value = transformDateToString(modelDate);
+      const modelDate = parseDateTime(model.value);
+      model.value = modelDate.set({ hour: value }).toString();
     },
   },
 );
@@ -101,12 +96,11 @@ const selectedHour = computed<number>(
 const selectedMinute = computed<number>(
   {
     get() {
-      return parseDateTime(model.value).toDate('Asia/Shanghai').getMinutes();
+      return parseDateTime(model.value).minute;
     },
     set(value) {
-      const modelDate = parseDateTime(model.value).toDate('Asia/Shanghai');
-      modelDate.setMinutes(value);
-      model.value = transformDateToString(modelDate);
+      const modelDate = parseDateTime(model.value);
+      model.value = modelDate.set({ minute: value }).toString();
     },
   },
 );
