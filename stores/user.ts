@@ -1,5 +1,6 @@
 import { toast } from 'vue-sonner';
 import { persistedState, useBookerStore } from '#imports';
+import { Seiue } from '~/lib/seiue';
 
 export const useUserStore = defineStore('user', () => {
   const loggedIn = ref(false);
@@ -31,7 +32,13 @@ export const useUserStore = defineStore('user', () => {
     toast.success('退出登录成功');
   }
 
+  async function checkLogin() {
+    if (loggedIn.value && accessToken.value)
+      return await Seiue.checkTokenStatus(accessToken.value);
+  }
+
   return {
+    checkLogin,
     loggedIn,
     accessToken,
     activeReflectionId,
