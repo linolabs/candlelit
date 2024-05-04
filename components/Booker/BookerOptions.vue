@@ -20,21 +20,23 @@
       <div class="px-2 py-2 flex items-center justify-between">
         <span>建筑排序</span>
         <div class="flex items-center space-x-2">
-          <template v-for="(building, index) in sortOptions.buildingOrder" :key="index">
-            <div class="grid grid-cols-1 justify-items-center	gap-y-1">
-              <span class="flex items-center justify-center font-bold shadow w-8 h-8 rounded-sm border border-primary">
-                {{ building }}
-              </span>
-              <div class="rounded-md flex">
-                <Button variant="outline" class="rounded-r-none p-1 h-6 w-6" :disabled="index === 0" @click="moveBuilding(index, -1)">
-                  <Icon icon="ph:caret-left-duotone" class="h-5 w-5" />
-                </Button>
-                <Button variant="outline" class="rounded-l-none p-1 h-6 w-6" :disabled="index === 3" @click="moveBuilding(index, 1)">
-                  <Icon icon="ph:caret-right-duotone" class="h-5 w-5" />
-                </Button>
+          <TransitionGroup name="list">
+            <template v-for="(building, index) in sortOptions.buildingOrder" :key="sortOptions.buildingOrder[index]">
+              <div class="grid grid-cols-1 justify-items-center	gap-y-1">
+                <span class="flex items-center justify-center font-bold shadow w-8 h-8 rounded-sm border border-primary">
+                  {{ building }}
+                </span>
+                <div class="rounded-md flex">
+                  <Button variant="outline" class="rounded-r-none p-1 h-6 w-6" :disabled="index === 0" @click="moveBuilding(index, -1)">
+                    <Icon icon="ph:caret-left-duotone" class="h-5 w-5" />
+                  </Button>
+                  <Button variant="outline" class="rounded-l-none p-1 h-6 w-6" :disabled="index === 3" @click="moveBuilding(index, 1)">
+                    <Icon icon="ph:caret-right-duotone" class="h-5 w-5" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          </template>
+            </template>
+          </TransitionGroup>
         </div>
       </div>
     </div>
@@ -60,3 +62,23 @@ function moveBuilding(index: number, delta: 1 | -1) {
   sortOptions.value = { ...sortOptions.value, buildingOrder: newOrder };
 }
 </script>
+
+<style scoped>
+.list-move,
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.35s cubic-bezier(0.55, 0, 0.1, 1);
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+/* ensure leaving items are taken out of layout flow so that moving
+   animations can be calculated correctly. */
+.list-leave-active {
+  position: absolute;
+}
+</style>
