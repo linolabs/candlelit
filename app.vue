@@ -12,7 +12,8 @@ import { Toaster } from '@/components/ui/sonner';
 onMounted(async () => {
   const userStore = useUserStore();
   const check = await userStore.checkLogin();
-  if (!check) {
+  // only toast if login is **expired**
+  if (userStore.loggedIn && !check) {
     userStore.logout(true);
     toast.warning('登录过期，请重新登录');
   }
