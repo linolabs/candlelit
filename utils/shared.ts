@@ -1,17 +1,12 @@
-/**
- * Formats a given date object into a string representation.
- * The resulting string is in the format "YYYY-MM-DD HH:mm:ss".
- *
- * @param date - The date object to be formatted.
- * @returns The formatted string representation of the date.
- */
-
 import { CalendarDateTime, endOfWeek, startOfWeek } from '@internationalized/date';
 
 export function parseSeiueDateString(dateString: string) {
   return new Date(dateString).toISOString().split('.')[0];
 }
-
+/**
+ * Note: seconds are set to 0.
+ * @returns CalendarDateTime object representing the current day.
+ */
 export function todayInCalendarDateTime() {
   const todayInTimeStringFromDate = (new Date()).toLocaleString('en-GB', { timeZone: 'Asia/Shanghai' });
   const regex = /^(\d{2})\/(\d{2})\/(\d{4}), (\d{2}):(\d{2}):(\d{2})$/;
@@ -25,10 +20,15 @@ export function todayInCalendarDateTime() {
     0, // seconds should always be 0
   ));
 }
+/**
+ * @returns Time string in the format of 'YYYY-MM-DDTHH:mm:ss'. Yes, there is a `T` in the middle.
+ */
 export function todayInTimeString() {
   return todayInCalendarDateTime().toString();
 }
-
+/**
+ * @returns Time string in the format of 'YYYY-MM-DD HH:mm:ss'.
+ */
 export function toSeiueString(date: CalendarDateTime) {
   return date.toString().replace('T', ' ');
 }
