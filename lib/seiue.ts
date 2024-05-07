@@ -12,7 +12,7 @@ import type {
   TTimeRangeItem,
   TVenueList,
 } from '~/types';
-import { getMondayOfWeek, getSundayTwoWeeksLater, splitCommaSeparatedString } from '~/utils/shared';
+import { getMondayNextWeek, getMondayThisWeek, getMondayTwoWeeksLater, getSundayNextWeek, getSundayThisWeek, getSundayTwoWeeksLater, splitCommaSeparatedString } from '~/utils/shared';
 import { SEIUE_API_URL, SEIUE_CHALK_URL, SEIUE_PASSPORT_URL, candlelitMark } from '~/constants';
 
 export function cookiesParser(cookies: string[]) {
@@ -132,7 +132,7 @@ export class Seiue {
           this.fetcher<TSeiueCalenderEventResponse>(`${SEIUE_API_URL}/scms/venue/venues/calendar-events`, {
             params: {
               end_time: getSundayTwoWeeksLater(),
-              start_time: getMondayOfWeek(),
+              start_time: getMondayThisWeek(),
               venue_id_in: venueIds,
             },
             method: 'GET',
@@ -148,17 +148,40 @@ export class Seiue {
    * Venue IDs will be split into groups of `splitSize` to avoid too large response and loss of data.
    *
    * @param venueIds - The IDs of the venues to retrieve order times for.
-   * @param splitSize - The number of venue IDs to include in each API request. Defaults to 3.
+   * @param splitSize - The number of venue IDs to include in each API request. Defaults to 1.
    */
-  async getOrderTimes(venueIds: string, splitSize: number = 3): Promise < TSeiueOrderTimesResponse > {
+  async getOrderTimes(venueIds: string, splitSize: number = 1): Promise<TSeiueOrderTimesResponse> {
     const venueIdGroups = splitCommaSeparatedString(venueIds, splitSize);
+    // const timeGroups = [
+    //   { startAt: getMondayThisWeek(), endAt: getSundayThisWeek() },
+    //   { startAt: getMondayNextWeek(), endAt: getSundayNextWeek() },
+    //   { startAt: getMondayTwoWeeksLater(), endAt: getSundayTwoWeeksLater() },
+    // ];
+    // // for each venueIdGroup, iterate through timeGroups and get the order times
+    // const orderTimes = [];
+    // for (const venueIds of venueIdGroups) {
+    //   for (const { startAt, endAt } of timeGroups) {
+    //     const orderTimesForGroup = await this.fetcher<TSeiueOrderTimesResponse>(`${SEIUE_API_URL}/scms/venue/order-times`, {
+    //       params: {
+    //         end_at_elt: endAt,
+    //         start_at_egt: startAt,
+    //         status: 'initiated',
+    //         venue_id_in: venueIds,
+    //       },
+    //       method: 'GET',
+    //     });
+    //     orderTimes.push(...orderTimesForGroup);
+    //   }
+    // }
+    // return orderTimes;
+
     const orderTimes = await Promise.all(
       venueIdGroups.map(
         venueIds =>
           this.fetcher<TSeiueOrderTimesResponse>(`${SEIUE_API_URL}/scms/venue/order-times`, {
             params: {
               end_at_elt: getSundayTwoWeeksLater(),
-              start_at_egt: getMondayOfWeek(),
+              start_at_egt: getMondayThisWeek(),
               status: 'initiated',
               venue_id_in: venueIds,
             },
