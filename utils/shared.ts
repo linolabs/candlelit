@@ -38,9 +38,29 @@ export function toSeiueString(date: CalendarDateTime) {
  * The time is set to 00:00:00.
  * @returns Time string in the format of 'YYYY-MM-DD HH:mm:ss'.
  */
-export function getMondayOfWeek() {
+export function getMondayThisWeek() {
   const date = todayInCalendarDateTime();
-  return toSeiueString(startOfWeek(date, 'zh-CN'));
+  return toSeiueString(startOfWeek(date, 'zh-CN').set({ second: 0, minute: 0, hour: 0 }));
+}
+
+export function getSundayThisWeek() {
+  const date = todayInCalendarDateTime();
+  return toSeiueString(endOfWeek(date, 'zh-CN').set({ second: 59, minute: 59, hour: 23 }));
+}
+
+export function getMondayNextWeek() {
+  const date = todayInCalendarDateTime();
+  return toSeiueString(startOfWeek(date.add({ weeks: 1 }), 'zh-CN').set({ second: 0, minute: 0, hour: 0 }));
+}
+
+export function getSundayNextWeek() {
+  const date = todayInCalendarDateTime();
+  return toSeiueString(endOfWeek(date.add({ weeks: 1 }), 'zh-CN').set({ second: 59, minute: 59, hour: 23 }));
+}
+
+export function getMondayTwoWeeksLater() {
+  const date = todayInCalendarDateTime();
+  return toSeiueString(endOfWeek(date.add({ weeks: 2 }), 'zh-CN').set({ second: 0, minute: 0, hour: 0 }));
 }
 
 /**
@@ -51,6 +71,20 @@ export function getMondayOfWeek() {
 export function getSundayTwoWeeksLater() {
   const date = todayInCalendarDateTime();
   return toSeiueString(endOfWeek(date.add({ weeks: 2 }), 'zh-CN').set({ second: 59, minute: 59, hour: 23 }));
+}
+
+export function getTimeRangeNextWeek(day: number, timeAt: 'noon' | 'afternoon') {
+  const nextWeekMonday = startOfWeek(todayInCalendarDateTime().add({ weeks: 1 }), 'zh-CN');
+  const rangePattern = {
+    noon: { start: { hour: 12, minute: 0, second: 0 }, end: { hour: 14, minute: 0, second: 0 } },
+    afternoon: { start: { hour: 16, minute: 30, second: 0 }, end: { hour: 18, minute: 30, second: 0 } },
+  };
+  const start = nextWeekMonday.add({ days: day - 1 }).set(rangePattern[timeAt].start);
+  const end = nextWeekMonday.add({ days: day - 1 }).set(rangePattern[timeAt].end);
+  return {
+    start: start.toString(),
+    end: end.toString(),
+  };
 }
 
 export function splitCommaSeparatedString(source: string, splitSize: number) {

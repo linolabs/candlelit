@@ -1,3 +1,4 @@
+import { toast } from 'vue-sonner';
 import { useUserStore } from '#imports';
 import { Seiue } from '~/lib/seiue';
 import { Booker } from '~/lib/booker';
@@ -8,6 +9,7 @@ export const useBookerStore = defineStore('booker', () => {
   const orderList = ref<(TOrderStoreItem)[]>([]);
   const venueList = ref<TVenueList>();
   const orderIndexer = ref(0);
+  const isFetchingVenueList = ref(false);
   const sortOptions = ref<TSortOptions>({
     firstSortBy: 'floor',
     buildingOrder: ['B', 'C', 'A', 'D'],
@@ -62,11 +64,15 @@ export const useBookerStore = defineStore('booker', () => {
     await addOrder(order);
   }
 
-  async function fetchVenueList() {
+  async function fetchVenueList(silent: boolean = true) {
     if (!userStore.loggedIn)
       return;
+    isFetchingVenueList.value = true;
+    if (!silent)
+      toast.info('获取场地列表中...');
     const seiue = new Seiue(userStore.accessToken as string, userStore.activeReflectionId as number);
     venueList.value = Booker.sortVenues(await seiue.getVenueList(), sortOptions.value);
+    isFetchingVenueList.value = false;
   }
 
   function clearVenueList() {
@@ -95,6 +101,7 @@ export const useBookerStore = defineStore('booker', () => {
     orderList,
     venueList,
     sortOptions,
+    isFetchingVenueList,
     getOrder,
     removeOrder,
     addOrder,

@@ -1,6 +1,14 @@
 <template>
   <UseTemplate>
     <form class="space-y-4" @submit="onSubmit">
+      <div class="grid grid-cols-1 gap-2">
+        <BookerTimeQuickSelect @update:time="onEmit">
+          <Button variant="outline" class="px-2 py-1 text-sm" type="button" @click.prevent="useTimeQuickSelect">
+            快捷选择
+          </Button>
+        </BookerTimeQuickSelect>
+        <BookerTimeCheck :start-time="startTime" :end-time="endTime" />
+      </div>
       <FormField name="startTime">
         <FormItem>
           <FormLabel>开始时间</FormLabel>
@@ -19,6 +27,7 @@
           <FormMessage />
         </FormItem>
       </FormField>
+
       <FormField v-slot="{ componentField }" name="capacity">
         <FormItem>
           <FormLabel>使用人数</FormLabel>
@@ -157,6 +166,15 @@ watch(editingOrderIndexer, (newVal) => {
     }
   }
 });
+
+function onEmit(val: { start: string;end: string }) {
+  startTime.value = val.start;
+  endTime.value = val.end;
+  setValues({
+    startTime: val.start,
+    endTime: val.end,
+  });
+}
 
 const onSubmit = handleSubmit(async (values) => {
   isLoading.value = true;

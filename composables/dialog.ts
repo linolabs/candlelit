@@ -22,3 +22,9 @@ export async function useOrderEditDialog(indexer?: number) {
     editingOrderIndexer.value = undefined;
   }, 150);
 }
+
+export const isTimeQuickSelectOpen = ref(false);
+
+export function useTimeQuickSelect() {
+  isTimeQuickSelectOpen.value = true;
+}
