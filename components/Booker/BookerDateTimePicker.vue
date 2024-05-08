@@ -16,7 +16,7 @@
       <PopoverContent class="w-auto p-0 grid grid-cols-1 auto-cols-min">
         <Calendar
           v-model="selectedDate"
-          :min-value="todayInCalendarDateTime()"
+          :min-value="nowInCalendarDateTime()"
           class="col-span-1 z-30"
           locale="zh-CN"
         />
@@ -61,7 +61,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/ui-utils';
 import { Input } from '@/components/ui/input';
 
-import { todayInCalendarDateTime } from '~/utils/shared';
+import { nowInCalendarDateTime } from '~/utils/shared';
 
 const model = defineModel<string>('time', { required: true });
 

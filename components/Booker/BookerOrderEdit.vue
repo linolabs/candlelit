@@ -115,7 +115,7 @@ import {
 //   DrawerHeader,
 //   DrawerTitle,
 // } from '@/components/ui/drawer';
-import { todayInTimeString } from '~/utils/shared';
+import { nowInTimeString } from '~/utils/shared';
 
 const schema = toTypedSchema(z.object({
   startTime: z.string(),
@@ -126,7 +126,7 @@ const schema = toTypedSchema(z.object({
 
 const bookerStore = useBookerStore();
 
-const today = todayInTimeString();
+const today = nowInTimeString();
 
 const startTime = ref<string>(today);
 const endTime = ref<string>(today);
@@ -135,8 +135,8 @@ const isLoading = ref(false);
 const { handleSubmit, setValues } = useForm({
   validationSchema: schema,
   initialValues: {
-    startTime: todayInTimeString(),
-    endTime: todayInTimeString(),
+    startTime: nowInTimeString(),
+    endTime: nowInTimeString(),
     capacity: 10,
     description: '',
   },
@@ -147,8 +147,8 @@ const isAddingNewOrder = computed(() => editingOrderIndexer.value === undefined)
 watch(editingOrderIndexer, (newVal) => {
   if (newVal === undefined) {
     setValues({
-      startTime: todayInTimeString(),
-      endTime: todayInTimeString(),
+      startTime: nowInTimeString(),
+      endTime: nowInTimeString(),
       capacity: 10,
       description: '',
     });

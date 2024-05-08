@@ -28,6 +28,7 @@ export const useUserStore = defineStore('user', () => {
     loggedIn.value = false;
     accessToken.value = undefined;
     activeReflectionId.value = undefined;
+    bookerStore.clearOrderList();
     bookerStore.clearVenueList();
     if (!noToast)
       toast.success('退出登录成功');

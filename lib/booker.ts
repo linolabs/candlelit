@@ -156,7 +156,8 @@ export class Booker {
         return {
           success: true,
           message: '创建成功',
-          order,
+          order: orderInput,
+          seiueOrder: order,
         };
       } catch {
         return {
@@ -185,7 +186,8 @@ export class Booker {
         return {
           success: true,
           message: '创建成功',
-          order: result.value,
+          order: orderInput[index],
+          seiueOrder: result.value,
         };
       } else {
         return {

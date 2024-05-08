@@ -2,12 +2,13 @@ import { toast } from 'vue-sonner';
 import { useUserStore } from '#imports';
 import { Seiue } from '~/lib/seiue';
 import { Booker } from '~/lib/booker';
-import type { TNewOrderInput, TOrderStoreItem, TSortOptions, TVenueList } from '~/types';
+import type { TNewOrderInput, TOrderStoreItem, TSendOrderResultHistory, TSortOptions, TVenueList } from '~/types';
 
 export const useBookerStore = defineStore('booker', () => {
   const userStore = useUserStore();
   const orderList = ref<(TOrderStoreItem)[]>([]);
   const venueList = ref<TVenueList>();
+  const sendOrderResultHistory = ref<TSendOrderResultHistory>([]);
   const orderIndexer = ref(0);
   const isFetchingVenueList = ref(false);
   const sortOptions = ref<TSortOptions>({
@@ -79,6 +80,10 @@ export const useBookerStore = defineStore('booker', () => {
     venueList.value = undefined;
   }
 
+  function clearSendOrderResultHistory() {
+    sendOrderResultHistory.value = [];
+  }
+
   async function sendOrder() {
     if (!userStore.loggedIn
       || !userStore.accessToken
@@ -89,7 +94,12 @@ export const useBookerStore = defineStore('booker', () => {
       return;
     const seiue = new Seiue(userStore.accessToken, userStore.activeReflectionId);
     const booker = new Booker(seiue);
-    return await booker.sendOrder(orderList.value);
+    const result = await booker.sendOrder(orderList.value);
+    sendOrderResultHistory.value.push({
+      createdAt: nowInTimeString(),
+      result,
+    });
+    return result;
   }
 
   watch(sortOptions, () => {
@@ -102,6 +112,7 @@ export const useBookerStore = defineStore('booker', () => {
     venueList,
     sortOptions,
     isFetchingVenueList,
+    sendOrderResultHistory,
     getOrder,
     removeOrder,
     addOrder,
@@ -110,6 +121,7 @@ export const useBookerStore = defineStore('booker', () => {
     updateOrder,
     fetchVenueList,
     clearVenueList,
+    clearSendOrderResultHistory,
   };
 }, {
   persist: {

@@ -3,6 +3,10 @@
     <BookerOptions />
     <BookerOrderList />
     <BookerOrderEdit />
-    <BookerSendOrder />
+    <BookerSendOrderResult />
+    <div class="flex gap-x-2">
+      <BookerSendOrderHistory />
+      <BookerSendOrder />
+    </div>
   </div>
 </template>

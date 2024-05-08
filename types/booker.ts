@@ -58,7 +58,8 @@ export interface TNewOrderInput {
 export type TSendOrderResultItem = {
   success: true;
   message: string;
-  order: TOrder;
+  order: TNewOrder;
+  seiueOrder: TOrder;
 } | {
   success: false;
   message: string;
@@ -66,3 +67,10 @@ export type TSendOrderResultItem = {
 };
 
 export type TSendOrderResult = TSendOrderResultItem[];
+
+export interface TSendOrderResultHistoryItem {
+  result: TSendOrderResult;
+  createdAt: string;
+}
+
+export type TSendOrderResultHistory = TSendOrderResultHistoryItem[];

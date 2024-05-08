@@ -5,7 +5,7 @@
     </PopoverTrigger>
     <PopoverContent class="grid grid-cols-2 gap-1 w-56">
       <template v-for="(item, index) in timeRangeMap" :key="index">
-        <Button variant="outline" class="px-2 py-1 text-sm" @click="handleClick(item.timeRange)">
+        <Button variant="outline" class="px-2 py-1 text-sm" type="button" @click.prevent="handleClick(item.timeRange)">
           {{ item.label }}
         </Button>
       </template>

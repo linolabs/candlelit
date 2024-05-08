@@ -1,3 +1,5 @@
+import type { TSendOrderResult } from '~/types';
+
 export const isLoginDialogOpen = ref(false);
 export function useLoginDialog() {
   isLoginDialogOpen.value = true;
@@ -27,4 +29,11 @@ export const isTimeQuickSelectOpen = ref(false);
 
 export function useTimeQuickSelect() {
   isTimeQuickSelectOpen.value = true;
+}
+
+export const isSendOrderResultOpen = ref(false);
+export const sendOrderResult = ref<TSendOrderResult>();
+export function useSendOrderResultDialog(data: TSendOrderResult) {
+  sendOrderResult.value = data;
+  isSendOrderResultOpen.value = true;
 }

@@ -7,10 +7,10 @@ export function parseSeiueDateString(dateString: string) {
  * Note: seconds are set to 0.
  * @returns CalendarDateTime object representing the current day.
  */
-export function todayInCalendarDateTime() {
-  const todayInTimeStringFromDate = (new Date()).toLocaleString('en-GB', { timeZone: 'Asia/Shanghai' });
+export function nowInCalendarDateTime() {
+  const nowInTimeStringFromDate = (new Date()).toLocaleString('en-GB', { timeZone: 'Asia/Shanghai' });
   const regex = /^(\d{2})\/(\d{2})\/(\d{4}), (\d{2}):(\d{2}):(\d{2})$/;
-  const [_, day, month, year, hour, minute] = todayInTimeStringFromDate.match(regex)!;
+  const [_, day, month, year, hour, minute] = nowInTimeStringFromDate.match(regex)!;
   return (new CalendarDateTime(
     Number.parseInt(year),
     Number.parseInt(month),
@@ -23,8 +23,8 @@ export function todayInCalendarDateTime() {
 /**
  * @returns Time string in the format of 'YYYY-MM-DDTHH:mm:ss'. Yes, there is a `T` in the middle.
  */
-export function todayInTimeString() {
-  return todayInCalendarDateTime().toString();
+export function nowInTimeString() {
+  return nowInCalendarDateTime().toString();
 }
 /**
  * @returns Time string in the format of 'YYYY-MM-DD HH:mm:ss'.
@@ -39,27 +39,27 @@ export function toSeiueString(date: CalendarDateTime) {
  * @returns Time string in the format of 'YYYY-MM-DD HH:mm:ss'.
  */
 export function getMondayThisWeek() {
-  const date = todayInCalendarDateTime();
+  const date = nowInCalendarDateTime();
   return toSeiueString(startOfWeek(date, 'zh-CN').set({ second: 0, minute: 0, hour: 0 }));
 }
 
 export function getSundayThisWeek() {
-  const date = todayInCalendarDateTime();
+  const date = nowInCalendarDateTime();
   return toSeiueString(endOfWeek(date, 'zh-CN').set({ second: 59, minute: 59, hour: 23 }));
 }
 
 export function getMondayNextWeek() {
-  const date = todayInCalendarDateTime();
+  const date = nowInCalendarDateTime();
   return toSeiueString(startOfWeek(date.add({ weeks: 1 }), 'zh-CN').set({ second: 0, minute: 0, hour: 0 }));
 }
 
 export function getSundayNextWeek() {
-  const date = todayInCalendarDateTime();
+  const date = nowInCalendarDateTime();
   return toSeiueString(endOfWeek(date.add({ weeks: 1 }), 'zh-CN').set({ second: 59, minute: 59, hour: 23 }));
 }
 
 export function getMondayTwoWeeksLater() {
-  const date = todayInCalendarDateTime();
+  const date = nowInCalendarDateTime();
   return toSeiueString(endOfWeek(date.add({ weeks: 2 }), 'zh-CN').set({ second: 0, minute: 0, hour: 0 }));
 }
 
@@ -69,12 +69,12 @@ export function getMondayTwoWeeksLater() {
  * @returns Time string in the format of 'YYYY-MM-DD HH:mm:ss'.
  */
 export function getSundayTwoWeeksLater() {
-  const date = todayInCalendarDateTime();
+  const date = nowInCalendarDateTime();
   return toSeiueString(endOfWeek(date.add({ weeks: 2 }), 'zh-CN').set({ second: 59, minute: 59, hour: 23 }));
 }
 
 export function getTimeRangeNextWeek(day: number, timeAt: 'noon' | 'afternoon') {
-  const nextWeekMonday = startOfWeek(todayInCalendarDateTime().add({ weeks: 1 }), 'zh-CN');
+  const nextWeekMonday = startOfWeek(nowInCalendarDateTime().add({ weeks: 1 }), 'zh-CN');
   const rangePattern = {
     noon: { start: { hour: 12, minute: 0, second: 0 }, end: { hour: 14, minute: 0, second: 0 } },
     afternoon: { start: { hour: 16, minute: 30, second: 0 }, end: { hour: 18, minute: 30, second: 0 } },
