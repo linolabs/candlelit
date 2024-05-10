@@ -34,6 +34,10 @@ function handleClick() {
     toast.error('请先登录');
     return;
   }
+  if (bookerStore.isFetchingVenueList) {
+    toast.error('正在加载场地列表，请稍等几秒');
+    return;
+  }
   useOrderEditDialog();
 }
 </script>
