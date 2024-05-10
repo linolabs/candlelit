@@ -11,6 +11,8 @@ export const useBookerStore = defineStore('booker', () => {
   const sendOrderResultHistory = ref<TSendOrderResultHistory>([]);
   const orderIndexer = ref(0);
   const isFetchingVenueList = ref(false);
+  const lastCapacity = ref(15);
+  const lastDescription = ref<string>('');
   const sortOptions = ref<TSortOptions>({
     firstSortBy: 'floor',
     buildingOrder: ['B', 'C', 'A', 'D'],
@@ -23,6 +25,8 @@ export const useBookerStore = defineStore('booker', () => {
       orderIndexer: ++orderIndexer.value,
       ...(await Booker.generateOrder(order, venueList.value)),
     });
+    lastCapacity.value = order.capacity;
+    lastDescription.value = order.description;
   }
 
   function getOrder(indexer: number | undefined) {
@@ -110,6 +114,8 @@ export const useBookerStore = defineStore('booker', () => {
   return {
     orderList,
     venueList,
+    lastCapacity,
+    lastDescription,
     sortOptions,
     isFetchingVenueList,
     sendOrderResultHistory,

@@ -39,7 +39,18 @@
       </FormField>
       <FormField v-slot="{ componentField }" name="description">
         <FormItem>
-          <FormLabel>场地用途</FormLabel>
+          <FormLabel class="flex items-center gap-x-2">
+            <span>场地用途</span>
+            <Button
+              v-if="bookerStore.lastDescription"
+              type="button"
+              class="text-xs sm:text-sm py-0 px-2"
+              variant="outline"
+              @click.prevent="() => setValues({ description: bookerStore.lastDescription }, false)"
+            >
+              填入上次内容
+            </Button>
+          </FormLabel>
           <FormControl>
             <Textarea id="description" v-bind="componentField" />
           </FormControl>
@@ -149,7 +160,7 @@ watch(editingOrderIndexer, (newVal) => {
     setValues({
       startTime: nowInTimeString(),
       endTime: nowInTimeString(),
-      capacity: 10,
+      capacity: bookerStore.lastCapacity,
       description: '',
     });
   } else {
