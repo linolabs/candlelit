@@ -1,75 +1,25 @@
-# Nuxt 3 Minimal Starter
+![banner](./.github/assets/candlelit-banner.png)
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+<p align="center">
+  <a href="https://nuxt.com"><img src="https://img.shields.io/badge/Built%20With%20Nuxt-18181B?logo=nuxt.js" alt="Nuxt Website"></a>
+  <a href="https://github.com/linolabs/candlelit/pulls"><img src="https://img.shields.io/badge/PRs-welcome-blue.svg" alt="PRs Welcome"></a>
+</p>
 
-## Setup
+# Candlelit
 
-Make sure to install the dependencies:
+## Features
 
-```bash
-# npm
-npm install
+- Time quick select
+- Customizable venue order
+- Auto-select venue
+- Export results to image
 
-# pnpm
-pnpm install
+## Contributors
 
-# yarn
-yarn install
+<a href="https://github.com/linolabs/candlelit/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=linolabs/candlelit" />
+</a>
 
-# bun
-bun install
-```
+## License
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm run dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm run build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm run preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+Licensed under [GPL v3](./LICENSE).
