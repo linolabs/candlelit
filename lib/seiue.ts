@@ -45,6 +45,8 @@ export class Seiue {
         'x-school-id': '282',
         'referer': SEIUE_CHALK_URL,
       },
+      retry: 2,
+      retryDelay: 50,
     });
   }
 
