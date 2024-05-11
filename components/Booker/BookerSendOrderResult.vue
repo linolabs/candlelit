@@ -14,9 +14,9 @@
         个。
       </h5>
       <div>
-        <Button type="button" class="w-full text-sm flex items-center" :disabled="isExporting" @click="exportToImage">
+        <Button type="button" class="w-full text-sm flex items-center" :disabled="isExporting || isWechat" @click="exportToImage">
           <Icon v-if="isExporting" icon="ph:spinner" class="w-4 h-4 animate-spin mr-2" />
-          导出结果图（只含成功预约）
+          {{ isWechat ? '微信不支持导出图片，请截图' : '导出结果图（只含成功预约）' }}
         </Button>
       </div>
       <div v-if="sendOrderResult.filter(result => result.success).length" class="space-y-1 mb-4">
@@ -56,13 +56,11 @@ import { isSendOrderResultOpen, sendOrderResult } from '~/composables/dialog';
 import { saveFile, toDateTimeString } from '~/utils/shared';
 
 const isExporting = ref(false);
+const isWechat = computed(() => /MicroMessenger/i.test(window.navigator.userAgent));
 
 async function exportToImage() {
   if (!sendOrderResult.value)
     return;
-
-  if (/MicroMessenger/i.test(window.navigator.userAgent))
-    toast.error('微信不支持导出图片，请截图本页面');
 
   const successOrdersResult = sendOrderResult.value.filter(result => result.success);
   const exportInput = {
