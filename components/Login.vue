@@ -56,6 +56,7 @@
 import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { z } from 'zod';
+import { toast } from 'vue-sonner';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -91,11 +92,16 @@ const isLoading = ref(false);
 
 const onSubmit = form.handleSubmit(async (values) => {
   isLoading.value = true;
-  const success = await userStore.login(values);
-  isLoading.value = false;
-  if (success) {
-    isLoginDialogOpen.value = false;
-    await bookerStore.fetchVenueList();
+  try {
+    const success = await userStore.login(values);
+    isLoading.value = false;
+    if (success) {
+      isLoginDialogOpen.value = false;
+      await bookerStore.fetchVenueList();
+    }
+  } catch {
+    isLoading.value = false;
+    toast.error('登录失败，可能是使用人数太多，请等等吧');
   }
 });
 </script>
