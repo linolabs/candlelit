@@ -89,19 +89,20 @@ const bookerStore = useBookerStore();
 const userStore = useUserStore();
 
 const isLoading = ref(false);
+const loginSuccess = ref(false);
 
 const onSubmit = form.handleSubmit(async (values) => {
   isLoading.value = true;
   try {
-    const success = await userStore.login(values);
+    loginSuccess.value = await userStore.login(values);
     isLoading.value = false;
-    if (success) {
-      isLoginDialogOpen.value = false;
-      await bookerStore.fetchVenueList();
-    }
   } catch {
     isLoading.value = false;
     toast.error('登录失败，可能是使用人数太多，请等等吧');
+  }
+  if (loginSuccess.value) {
+    isLoginDialogOpen.value = false;
+    await bookerStore.fetchVenueList();
   }
 });
 </script>
