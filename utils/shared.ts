@@ -1,4 +1,5 @@
-import { CalendarDateTime, endOfWeek, parseDateTime, startOfWeek } from '@internationalized/date';
+import { CalendarDateTime, DateFormatter, endOfWeek, parseDateTime, startOfWeek } from '@internationalized/date';
+import type { TImageExportProps } from '~/types';
 
 export function parseSeiueDateString(dateString: string) {
   return parseDateTime(dateString.replace(' ', 'T')).toString();
@@ -31,6 +32,10 @@ export function nowInTimeString() {
  */
 export function toSeiueString(date: CalendarDateTime) {
   return date.toString().replace('T', ' ');
+}
+
+export function toDateTimeString(input: string) {
+  return input.replace(' ', 'T');
 }
 
 /**
@@ -93,4 +98,63 @@ export function splitCommaSeparatedString(source: string, splitSize: number) {
   for (let i = 0; i < sourceArray.length; i += splitSize)
     groups.push(sourceArray.slice(i, i + splitSize).join(','));
   return groups;
+}
+
+export function transformExportInput(data: TImageExportProps) {
+  const df = new DateFormatter('zh-CN', {
+    dateStyle: 'long',
+    timeStyle: 'short',
+  });
+  return {
+    createdAt: df.format(parseDateTime(data.createdAt).toDate('Asia/Shanghai')),
+    orders: data.orders.map(order => ({
+      startTime: df.format(parseDateTime(order.startTime).toDate('Asia/Shanghai')),
+      endTime: df.format(parseDateTime(order.endTime).toDate('Asia/Shanghai')),
+      venueName: order.venueName,
+      capacity: order.capacity,
+      description: order.description.length > 14 ? `${order.description.substring(0, 13)}...` : order.description,
+    })),
+  };
+}
+
+declare global {
+  interface Navigator {
+    msSaveBlob?: (blob: any, defaultName?: string) => boolean;
+  }
+}
+
+export async function saveFile(blob: Blob, fileName: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (navigator.msSaveBlob) {
+      navigator.msSaveBlob(blob, fileName);
+      resolve();
+    } else if (/iPhone|fxios/i.test(navigator.userAgent)) {
+      const reader = new FileReader();
+      reader.addEventListener('loadend', () => {
+        if (reader.error)
+          return reject(reader.error);
+
+        if (reader.result) {
+          const a = document.createElement('a');
+          // @ts-expect-error dom
+          a.href = reader.result;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+        }
+        resolve();
+      });
+      reader.readAsDataURL(blob);
+    } else {
+      const downloadUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(downloadUrl);
+      document.body.removeChild(a);
+      setTimeout(resolve, 100);
+    }
+  });
 }

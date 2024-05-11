@@ -8,6 +8,8 @@ export default defineNuxtConfig({
     'shadcn-nuxt',
     '@pinia-plugin-persistedstate/nuxt',
     '@nuxt/image',
+    'unplugin-font-to-buffer/nuxt',
+    'v-satori/nuxt',
   ],
   shadcn: {
     /**

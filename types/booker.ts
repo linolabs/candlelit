@@ -74,3 +74,16 @@ export interface TSendOrderResultHistoryItem {
 }
 
 export type TSendOrderResultHistory = TSendOrderResultHistoryItem[];
+
+export interface TImageExportPropsItem {
+  startTime: string;
+  endTime: string;
+  venueName: string;
+  description: string;
+  capacity: number;
+}
+
+export interface TImageExportProps {
+  createdAt: string;
+  orders: TImageExportPropsItem[];
+};
