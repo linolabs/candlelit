@@ -12,7 +12,7 @@ import type {
   TTimeRangeItem,
   TVenueList,
 } from '~/types';
-import { getMondayNextWeek, getMondayThisWeek, getMondayTwoWeeksLater, getSundayNextWeek, getSundayThisWeek, getSundayTwoWeeksLater, splitCommaSeparatedString } from '~/utils/shared';
+import { getMondayThisWeek, getSundayTwoWeeksLater, splitCommaSeparatedString } from '~/utils/shared';
 import { SEIUE_API_URL, SEIUE_CHALK_URL, SEIUE_PASSPORT_URL, candlelitMark } from '~/constants';
 
 export function cookiesParser(cookies: string[]) {
