@@ -18,7 +18,7 @@
           <h4 class="text-orange-500">
             使用指南
           </h4>
-          <h4>
+          <h4 class="font-bold">
             智能筛选
           </h4>
           <p>
@@ -35,7 +35,7 @@
           <p>
             建筑之间的优先级可以在页面上设置，越靠<b>左</b>优先级越高。
           </p>
-          <h4>
+          <h4 class="font-bold">
             预约
           </h4>
           <p>
@@ -50,9 +50,17 @@
             <b class="text-orange-500">
               不收集用户信息
             </b>
-            ，感谢你的理解。
+            ，感谢你的理解。你可以查看源代码，了解更多细节。
           </p>
           <p>除登录请求外，其余请求，如获取教室列表、创建预约等均由在浏览器端发出（即服务器不可见）。</p>
+          <p>
+            本项目完全开源，你可以在
+            <a href="https://github.com/linolabs/candlelit" target="_blank">
+              GitHub
+            </a>
+            上查看源代码。
+            如果有任何疑问，可以提交 Issue。
+          </p>
         </div>
       </ScrollArea>
     </DialogContent>

@@ -11,7 +11,7 @@
         </AlertTitle>
         <AlertDescription>
           由于浏览器跨域请求限制，登录请求将由服务器转发，我们承诺不会记录您的密码。
-          使用本服务即代表您同意上述隐私政策。
+          使用本服务即代表您同意上述隐私政策。您可以查看源代码，了解更多细节。
         </AlertDescription>
       </Alert>
       <form class="grid grid-cols-1 gap-4" @submit="onSubmit">
