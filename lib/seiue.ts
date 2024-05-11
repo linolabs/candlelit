@@ -44,7 +44,7 @@ export class Seiue {
         'accept': 'application/json, text/plain, */*',
         'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
         'x-reflection-id': this.activeReflectionId.toString(),
-        'x-role': 'student',
+        // 'x-role': 'student', // seems not needed
         'x-school-id': '282',
         'referer': SEIUE_CHALK_URL,
       },
