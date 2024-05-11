@@ -39,10 +39,7 @@ export class Seiue {
     this.activeReflectionId = activeReflectionId;
     this.fetcher = ofetch.create({
       headers: {
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0',
         'authorization': `Bearer ${this.accessToken}`,
-        'accept': 'application/json, text/plain, */*',
-        'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
         'x-reflection-id': this.activeReflectionId.toString(),
         // 'x-role': 'student', // seems not needed
         'x-school-id': '282',
