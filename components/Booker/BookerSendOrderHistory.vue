@@ -1,7 +1,7 @@
 <template>
   <UseTemplate v-slot="{ createdAt, result }">
     <div class="border border-primary rounded-md px-2 py-2 grid grid-cols-1 gap-y-2 justify-items-center justift-center">
-      <h5> {{ df.format(parseDateTime(createdAt).toDate('Asia/shanghai')) }} </h5>
+      <h5> {{ df.format(parseDateTime(createdAt).toDate(getLocalTimeZone())) }} </h5>
       <div class="flex items-center gap-x-4">
         <div class="flex items-center gap-x-1">
           <Icon icon="ph-check-circle-duotone" class="h-5 w-5 text-green-500" />
@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue/dist/iconify.js';
-import { DateFormatter, parseDateTime } from '@internationalized/date';
+import { DateFormatter, getLocalTimeZone, parseDateTime } from '@internationalized/date';
 import {
   Dialog,
   DialogContent,

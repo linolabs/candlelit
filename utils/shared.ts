@@ -1,4 +1,4 @@
-import { CalendarDateTime, DateFormatter, endOfWeek, parseDateTime, startOfWeek } from '@internationalized/date';
+import { CalendarDateTime, DateFormatter, endOfWeek, getLocalTimeZone, parseDateTime, startOfWeek } from '@internationalized/date';
 import type { TImageExportProps } from '~/types';
 
 export function parseSeiueDateString(dateString: string) {
@@ -106,10 +106,10 @@ export function transformExportInput(data: TImageExportProps) {
     timeStyle: 'short',
   });
   return {
-    createdAt: df.format(parseDateTime(data.createdAt).toDate('Asia/Shanghai')),
+    createdAt: df.format(parseDateTime(data.createdAt).toDate(getLocalTimeZone())),
     orders: data.orders.map(order => ({
-      startTime: df.format(parseDateTime(order.startTime).toDate('Asia/Shanghai')),
-      endTime: df.format(parseDateTime(order.endTime).toDate('Asia/Shanghai')),
+      startTime: df.format(parseDateTime(order.startTime).toDate(getLocalTimeZone())),
+      endTime: df.format(parseDateTime(order.endTime).toDate(getLocalTimeZone())),
       venueName: order.venueName,
       capacity: order.capacity,
       description: order.description.length > 14 ? `${order.description.substring(0, 13)}...` : order.description,

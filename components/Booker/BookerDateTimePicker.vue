@@ -51,6 +51,7 @@ import type {
 } from '@internationalized/date';
 import {
   DateFormatter,
+  getLocalTimeZone,
   parseDateTime,
   toCalendarDate,
 } from '@internationalized/date';
@@ -106,7 +107,7 @@ const selectedMinute = computed<number>(
 );
 
 const selectedDateTimeString = computed<string>(() => {
-  const date = df.format(parseDateTime(model.value).toDate('Asia/Shanghai'));
+  const date = df.format(parseDateTime(model.value).toDate(getLocalTimeZone()));
   const hour = selectedHour.value.toString().padStart(2, '0');
   const minute = selectedMinute.value.toString().padStart(2, '0');
   return `${date} ${hour}:${minute}`;
