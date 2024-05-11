@@ -60,6 +60,10 @@ const isExporting = ref(false);
 async function exportToImage() {
   if (!sendOrderResult.value)
     return;
+
+  if (/MicroMessenger/i.test(window.navigator.userAgent))
+    toast.error('微信不支持导出图片，请截图本页面');
+
   const successOrdersResult = sendOrderResult.value.filter(result => result.success);
   const exportInput = {
     createdAt: nowInTimeString(),
