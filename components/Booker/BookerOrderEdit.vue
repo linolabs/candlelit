@@ -196,8 +196,8 @@ const onSubmit = handleSubmit(async (values) => {
   const orderInput = {
     capacity: values.capacity,
     description: values.description,
-    startTime: startTime.toString(),
-    endTime: endTime.toString(),
+    startTime: toSeiueString(startTime),
+    endTime: toSeiueString(endTime),
   };
   try {
     if (editingOrderIndexer.value !== undefined)
