@@ -100,9 +100,19 @@ const onSubmit = form.handleSubmit(async (values) => {
     isLoading.value = false;
     toast.error('登录失败，可能是使用人数太多，请等等吧');
   }
-  if (loginSuccess.value) {
-    isLoginDialogOpen.value = false;
-    await bookerStore.fetchVenueList();
+  // if (loginSuccess.value) {
+  //   isLoginDialogOpen.value = false;
+  //   await bookerStore.fetchVenueList();
+  // }
+
+  // temporary try catch
+  try {
+    if (loginSuccess.value) {
+      isLoginDialogOpen.value = false;
+      await bookerStore.fetchVenueList();
+    }
+  } catch (e) {
+    console.log('error', e);
   }
 });
 </script>

@@ -214,8 +214,11 @@ export class Seiue {
       };
     });
     const venueIds = venues.map(({ id }) => id).join(',');
+    console.log('venue ids fetched')
     const calendarEvents = await this.getCalendarEvents(venueIds);
+    console.log('calendar events fetched')
     const orderTimes = await this.getOrderTimes(venueIds);
+    console.log('order times fetched')
     for (const { venue_id, events } of calendarEvents) {
       const venue = venues.find(({ id }) => id === venue_id)!;
       venue.occupiedTimes.push(...events.map(({ start_time, end_time }) => ({ startAt: start_time, endAt: end_time })));
@@ -224,6 +227,7 @@ export class Seiue {
       const venue = venues.find(({ id }) => id === venue_id)!;
       venue.occupiedTimes.push({ startAt: start_at, endAt: end_at });
     }
+    console.log('before return')
     return venues;
   }
 
