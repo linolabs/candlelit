@@ -47,7 +47,9 @@ export class Booker {
 
       // Check if timeRange does not overlap with occupied time range
       return (start >= unavailableStart && start < unavailableEnd)
-        || (end > unavailableStart && end <= unavailableEnd);
+        || (end > unavailableStart && end <= unavailableEnd)
+        ||( unavailableStart > start && unavailableStart < end)
+        ||( unavailableEnd > start && unavailableEnd < end);
     }))
       return false;
 
