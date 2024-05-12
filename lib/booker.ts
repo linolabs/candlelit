@@ -1,4 +1,5 @@
 import type { Seiue } from './seiue';
+import { sortArray } from '~/utils/shared';
 import type { TNewOrder, TNewOrderInput, TSendOrderResult, TSendOrderResultItem, TSortOptions, TVenue, TVenueList } from '~/types';
 
 export class Booker {
@@ -48,8 +49,8 @@ export class Booker {
       // Check if timeRange does not overlap with occupied time range
       return (start >= unavailableStart && start < unavailableEnd)
         || (end > unavailableStart && end <= unavailableEnd)
-        ||( unavailableStart > start && unavailableStart < end)
-        ||( unavailableEnd > start && unavailableEnd < end);
+        || (unavailableStart > start && unavailableStart < end)
+        || (unavailableEnd > start && unavailableEnd < end);
     }))
       return false;
 
@@ -81,7 +82,7 @@ export class Booker {
   ) {
     const { firstSortBy, buildingOrder } = options;
 
-    return venues.toSorted((a, b) => {
+    return sortArray(venues, (a, b) => {
       if (firstSortBy === 'floor') {
         // First, sort by floor (lower is better)
         if (a.floor < b.floor)

@@ -76,7 +76,12 @@ export const useBookerStore = defineStore('booker', () => {
     if (!silent)
       toast.info('获取场地列表中...');
     const seiue = new Seiue(userStore.accessToken as string, userStore.activeReflectionId as number);
-    venueList.value = Booker.sortVenues(await seiue.getVenueList(), sortOptions.value);
+    try {
+      venueList.value = Booker.sortVenues(await seiue.getVenueList(), sortOptions.value);
+    } catch (e) {
+      console.error(e);
+      toast.error('获取场地列表失败，请刷新重试或联系开发者');
+    }
     isFetchingVenueList.value = false;
   }
 

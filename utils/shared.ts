@@ -158,3 +158,17 @@ export async function saveFile(blob: Blob, fileName: string): Promise<void> {
     }
   });
 }
+
+/**
+ * A simple polyfill for Array.prototype.toSorted().
+ */
+export function sortArray<T extends Array<any>>(array: any[], fn?: (a: any, b: any) => number): T {
+  // deep copy
+  const temp: T = JSON.parse(JSON.stringify(array));
+  // sort
+  if (fn)
+    temp.sort(fn);
+  else temp.sort();
+  // return sorted array
+  return temp;
+}
