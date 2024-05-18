@@ -4,7 +4,7 @@
       <DialogHeader>
         <DialogTitle>发送预约结果</DialogTitle>
       </DialogHeader>
-      <h5>
+      <h5 class="mb-2">
         本次共发送
         <span class="font-bold">{{ sendOrderResult.length }}</span>
         个预约，其中成功
@@ -13,7 +13,7 @@
         <span class="font-bold text-red-500">{{ sendOrderResult.filter(result => !result.success).length }}</span>
         个。
       </h5>
-      <div>
+      <div class="mb-2">
         <Button type="button" class="w-full text-sm flex items-center" :disabled="isExporting || isWechat" @click="exportToImage">
           <Icon v-if="isExporting" icon="ph:spinner" class="w-4 h-4 animate-spin mr-2" />
           {{ isWechat ? '微信不支持导出图片，请截图' : '导出结果图（只含成功预约）' }}
@@ -23,21 +23,25 @@
         <h5 class="font-bold text-base">
           成功的预约
         </h5>
-        <div class="border border-primary rounded-md py-2 grid grid-cols-1 gap-y-2 justify-items-center justift-center px-2">
-          <template v-for="(result, index) in sendOrderResult" :key="index">
-            <BookerOrderCard v-if="result.success" :order="result.order" :no-edit="true" />
-          </template>
-        </div>
+        <ScrollArea class="h-72 border border-primary rounded-md">
+          <div class="py-2 grid grid-cols-1 gap-y-2 justify-items-center justift-center px-2">
+            <template v-for="(result, index) in sendOrderResult" :key="index">
+              <BookerOrderCard v-if="result.success" :order="result.order" :no-edit="true" />
+            </template>
+          </div>
+        </ScrollArea>
       </div>
       <div v-if="sendOrderResult.filter(result => !result.success).length" class="space-y-1">
         <h5 class="font-bold text-base">
           失败的预约
         </h5>
-        <div class="border border-primary rounded-md py-2 grid grid-cols-1 gap-y-2 justify-items-center justift-center px-2">
-          <template v-for="(result, index) in sendOrderResult" :key="index">
-            <BookerOrderCard v-if="!result.success" :order="result.order" :no-edit="true" />
-          </template>
-        </div>
+        <ScrollArea class="h-72 border border-primary rounded-md">
+          <div class="py-2 grid grid-cols-1 gap-y-2 justify-items-center justift-center px-2">
+            <template v-for="(result, index) in sendOrderResult" :key="index">
+              <BookerOrderCard v-if="!result.success" :order="result.order" :no-edit="true" />
+            </template>
+          </div>
+        </ScrollArea>
       </div>
     </DialogContent>
   </Dialog>
@@ -51,6 +55,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { isSendOrderResultOpen, sendOrderResult } from '~/composables/dialog';
 import { saveFile, toDateTimeString } from '~/utils/shared';
