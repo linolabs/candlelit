@@ -34,7 +34,7 @@ export class Seiue {
   private fetcher: typeof ofetch;
   private zeroWidth = new ZeroWidth();
 
-  constructor(accessToken: string, activeReflectionId: number) {
+  constructor({ accessToken, activeReflectionId }: TDirectCredentials) {
     this.accessToken = accessToken;
     this.activeReflectionId = activeReflectionId;
     this.fetcher = ofetch.create({
@@ -50,43 +50,34 @@ export class Seiue {
     });
   }
 
-  static async init(credentials: TCredentials): Promise<Seiue | null>;
-  static async init(credentials: TDirectCredentials, direct: true): Promise<Seiue>;
-  static async init(credentials: TCredentials | TDirectCredentials, direct?: true): Promise<Seiue | null> {
-    if (direct) {
-      const { accessToken, activeReflectionId } = credentials as TDirectCredentials;
-      return new Seiue(accessToken, activeReflectionId);
-    }
+  static async init(credentials: TCredentials): Promise<Seiue> {
+    const loginRes = await this.login(credentials);
+    if (!loginRes)
+      throw new Error('登录失败');
+    return new Seiue({
+      accessToken: loginRes.accessToken,
+      activeReflectionId: loginRes.activeReflectionId,
+    });
+  }
+
+  static async login(credentials: TCredentials) {
     try {
-      const { schoolId, password } = credentials as TCredentials;
+      const { schoolId, password } = credentials;
       const loginRes = await ofetch.raw(`${SEIUE_PASSPORT_URL}/login?school_id=282`, {
         method: 'POST',
         headers: {
           'content-type': 'application/x-www-form-urlencoded',
-          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-          'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
-          'origin': SEIUE_PASSPORT_URL,
-          'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0',
-          'Referer': `${SEIUE_PASSPORT_URL}/login?school_id=282`,
         },
         redirect: 'manual',
         body: new URLSearchParams({ email: schoolId, password, school_id: '282', submit: '提交' }),
       });
       const cookies = cookiesParser(loginRes.headers.getSetCookie());
-      const authorizeRes = await ofetch<TSeiueAuthResposnse>(`${SEIUE_PASSPORT_URL}/authorize`, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          'accept': 'application/json, text/plain, */*',
-          'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
-          'origin': SEIUE_CHALK_URL,
-          'referer': SEIUE_CHALK_URL,
-          'cookie': Object.entries(cookies).map(([name, value]) => `${name}=${value}`).join('; '),
-          'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0',
-        },
-        body: new URLSearchParams({ client_id: 'GpxvnjhVKt56qTmnPWH1sA', response_type: 'token' }),
-      });
-      return new Seiue(authorizeRes.access_token, authorizeRes.active_reflection_id);
+      const authorizeRes = await this.retrieveToken(cookies);
+      return {
+        accessToken: authorizeRes.access_token,
+        activeReflectionId: authorizeRes.active_reflection_id,
+        cookies,
+      };
     } catch {
       return null;
     }
@@ -94,6 +85,22 @@ export class Seiue {
 
   user() {
     return { accessToken: this.accessToken, activeReflectionId: this.activeReflectionId };
+  }
+
+  static async retrieveToken(cookies: Record<string, string>) {
+    return ofetch<TSeiueAuthResposnse>(`${SEIUE_PASSPORT_URL}/authorize`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
+        'accept': 'application/json, text/plain, */*',
+        'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
+        'origin': SEIUE_CHALK_URL,
+        'referer': SEIUE_CHALK_URL,
+        'cookie': Object.entries(cookies).map(([name, value]) => `${name}=${value}`).join('; '),
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0',
+      },
+      body: new URLSearchParams({ client_id: 'GpxvnjhVKt56qTmnPWH1sA', response_type: 'token' }),
+    });
   }
 
   static async checkTokenStatus(accessToken: string) {

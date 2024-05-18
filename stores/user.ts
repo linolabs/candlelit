@@ -7,11 +7,12 @@ export const useUserStore = defineStore('user', () => {
   const accessToken = ref<string>();
   const activeReflectionId = ref<number>();
   const bookerStore = useBookerStore();
+  const cookies = ref<Record<string, string>>();
 
   async function login(credentials: { schoolId: string; password: string }) {
     const res = await $fetch('/api/login', {
       method: 'POST',
-      body: JSON.stringify(credentials),
+      body: credentials,
     });
     if (!res.success) {
       toast.error(res.message);
@@ -19,6 +20,7 @@ export const useUserStore = defineStore('user', () => {
       loggedIn.value = true;
       accessToken.value = res.accessToken;
       activeReflectionId.value = res.activeReflectionId;
+      cookies.value = res.cookies;
       toast.success(res.message);
     }
     return res.success;
@@ -28,6 +30,7 @@ export const useUserStore = defineStore('user', () => {
     loggedIn.value = false;
     accessToken.value = undefined;
     activeReflectionId.value = undefined;
+    cookies.value = undefined;
     bookerStore.clearOrderList();
     bookerStore.clearVenueList();
     if (!noToast)
@@ -35,8 +38,24 @@ export const useUserStore = defineStore('user', () => {
   }
 
   async function checkLogin() {
-    if (loggedIn.value && accessToken.value)
-      return await Seiue.checkTokenStatus(accessToken.value);
+    if (loggedIn.value && accessToken.value) {
+      const isTokenValid = await Seiue.checkTokenStatus(accessToken.value);
+      if (!isTokenValid) {
+        const res = await $fetch('/api/token', {
+          method: 'POST',
+          body: { cookies: cookies.value! },
+        });
+        if (res.success) {
+          accessToken.value = res.accessToken;
+          return true;
+        } else {
+          logout(true);
+          toast.warning('登录过期，请重新登录');
+          return false;
+        }
+      }
+    }
+    return false;
   }
 
   return {
@@ -46,6 +65,7 @@ export const useUserStore = defineStore('user', () => {
     activeReflectionId,
     login,
     logout,
+    cookies,
   };
 }, {
   persist: {

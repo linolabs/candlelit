@@ -75,7 +75,10 @@ export const useBookerStore = defineStore('booker', () => {
     isFetchingVenueList.value = true;
     if (!silent)
       toast.info('获取场地列表中...');
-    const seiue = new Seiue(userStore.accessToken as string, userStore.activeReflectionId as number);
+    const seiue = new Seiue({
+      accessToken: userStore.accessToken as string,
+      activeReflectionId: userStore.activeReflectionId as number,
+    });
     try {
       venueList.value = Booker.sortVenues(await seiue.getVenueList(), sortOptions.value);
     } catch (e) {
@@ -101,7 +104,10 @@ export const useBookerStore = defineStore('booker', () => {
       || orderList.value.length === 0
     )
       return;
-    const seiue = new Seiue(userStore.accessToken, userStore.activeReflectionId);
+    const seiue = new Seiue({
+      accessToken: userStore.accessToken,
+      activeReflectionId: userStore.activeReflectionId,
+    });
     const booker = new Booker(seiue);
     const result = await booker.sendOrder(orderList.value);
     sendOrderResultHistory.value.push({
