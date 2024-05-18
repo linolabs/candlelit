@@ -103,7 +103,7 @@ import { useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { toast } from 'vue-sonner';
 import { parseDateTime } from '@internationalized/date';
-import { editingOrderIndexer, isOrderEditDialogOpen } from '@/composables/dialog';
+import { bus, isOrderEditDialogOpen } from '@/composables/dialog';
 import { Button } from '@/components/ui/button';
 import {
   FormControl,
@@ -153,32 +153,37 @@ const { handleSubmit, setValues } = useForm({
   },
 });
 
-const isAddingNewOrder = computed(() => editingOrderIndexer.value === undefined);
+const isAddingNewOrder = ref(false);
+const editingOrderIndexer = ref<number | undefined>();
 
-watch(editingOrderIndexer, (newVal) => {
-  if (newVal === undefined) {
+bus.on((indexer) => {
+  editingOrderIndexer.value = indexer;
+  isAddingNewOrder.value = indexer === undefined;
+  if (indexer === undefined) {
     setValues({
       startTime: nowInTimeString(),
       endTime: nowInTimeString(),
       capacity: bookerStore.lastCapacity,
       description: '',
-    });
+    }, false);
+    startTime.value = nowInTimeString();
+    endTime.value = nowInTimeString();
   } else {
-    const order = bookerStore.getOrder(newVal);
+    const order = bookerStore.getOrder(indexer);
     if (order) {
       setValues({
         capacity: order.capacity,
         description: order.description,
         startTime: parseSeiueDateString(order.startTime),
         endTime: parseSeiueDateString(order.endTime),
-      });
+      }, false);
       startTime.value = parseSeiueDateString(order.startTime);
       endTime.value = parseSeiueDateString(order.endTime);
     }
   }
 });
 
-function onEmit(val: { start: string;end: string }) {
+function onEmit(val: { start: string; end: string }) {
   startTime.value = val.start;
   endTime.value = val.end;
   setValues({

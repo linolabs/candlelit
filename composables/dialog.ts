@@ -1,3 +1,4 @@
+import { useEventBus } from '@vueuse/core';
 import type { TSendOrderResult } from '~/types';
 
 export const isLoginDialogOpen = ref(false);
@@ -6,7 +7,9 @@ export function useLoginDialog() {
 }
 
 export const isOrderEditDialogOpen = ref(false);
-export const editingOrderIndexer = ref<number | undefined>();
+// export const editingOrderIndexer = ref<number | undefined>();
+
+export const bus = useEventBus<number>('editingOrderDialog');
 
 /**
  * Note: Pass `undefined` explicitly if used directly in `@click`,
@@ -15,14 +18,15 @@ export const editingOrderIndexer = ref<number | undefined>();
  * @param indexer
  */
 export async function useOrderEditDialog(indexer?: number) {
-  editingOrderIndexer.value = indexer;
+  // editingOrderIndexer.value = indexer;
+  bus.emit(indexer);
   isOrderEditDialogOpen.value = true;
 
   await until(isOrderEditDialogOpen).toBe(false);
   // use setTimeout to avoid ui flicker
-  setTimeout(() => {
-    editingOrderIndexer.value = undefined;
-  }, 150);
+  // setTimeout(() => {
+  //   editingOrderIndexer.value = undefined;
+  // }, 150);
 }
 
 export const isTimeQuickSelectOpen = ref(false);
