@@ -23,7 +23,7 @@
         <h5 class="font-bold text-base">
           成功的预约
         </h5>
-        <ScrollArea class="h-72 border border-primary rounded-md">
+        <ScrollArea class="max-h-72 border border-primary rounded-md">
           <div class="py-2 grid grid-cols-1 gap-y-2 justify-items-center justift-center px-2">
             <template v-for="(result, index) in sendOrderResult" :key="index">
               <BookerOrderCard v-if="result.success" :order="result.order" :no-edit="true" />
@@ -35,7 +35,7 @@
         <h5 class="font-bold text-base">
           失败的预约
         </h5>
-        <ScrollArea class="h-72 border border-primary rounded-md">
+        <ScrollArea class="max-h-72 border border-primary rounded-md">
           <div class="py-2 grid grid-cols-1 gap-y-2 justify-items-center justift-center px-2">
             <template v-for="(result, index) in sendOrderResult" :key="index">
               <BookerOrderCard v-if="!result.success" :order="result.order" :no-edit="true" />
