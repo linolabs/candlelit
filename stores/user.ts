@@ -43,7 +43,7 @@ export const useUserStore = defineStore('user', () => {
       if (!isTokenValid) {
         const res = await $fetch('/api/token', {
           method: 'POST',
-          body: { cookies: cookies.value! },
+          body: { cookies: cookies.value ?? {} },
         });
         if (res.success) {
           accessToken.value = res.accessToken;
