@@ -47,15 +47,16 @@ export const useUserStore = defineStore('user', () => {
         });
         if (res.success) {
           accessToken.value = res.accessToken;
-          return true;
+          return true; // refresh token success
         } else {
           logout(true);
           toast.warning('登录过期，请重新登录');
-          return false;
+          return false; // refresh token failed
         }
       }
+      return true; // token is valid
     }
-    return false;
+    return false; // not logged in
   }
 
   return {
