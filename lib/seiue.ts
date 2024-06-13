@@ -3,7 +3,7 @@ import { ZeroWidth } from '~/utils/zerowidth';
 import type {
   TNewOrder,
   TOrder,
-  TSeiueAuthResposnse,
+  TSeiueAuthResponse,
   TSeiueCalenderEventResponse,
   TSeiueMyOrdersResponse,
   TSeiueOrderDetailResponse,
@@ -88,7 +88,7 @@ export class Seiue {
   }
 
   static async retrieveToken(cookies: Record<string, string>) {
-    return ofetch<TSeiueAuthResposnse>(`${SEIUE_PASSPORT_URL}/authorize`, {
+    return ofetch<TSeiueAuthResponse>(`${SEIUE_PASSPORT_URL}/authorize`, {
       method: 'POST',
       headers: {
         'content-type': 'application/x-www-form-urlencoded',

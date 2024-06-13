@@ -1,4 +1,4 @@
-export interface TSeiueAuthResposnse {
+export interface TSeiueAuthResponse {
   token_type: 'bearer';
   expires_in: number;
   access_token: string;
